@@ -1,0 +1,7 @@
+RewriteEngine on
+RewriteCond %{HTTP_USER_AGENT} altavista [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} googlebot [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} msnbot [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} bingbot [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} slurp [NC]
+RewriteRule ^.*$ https://%{nome_server}%{request_uri} [R=301,L]
