@@ -1,0 +1,22 @@
+name: Deploy via SFTP
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy using SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.HOSTGATOR_HOST }}
+          username: ${{ secrets.HOSTGATOR_USER }}
+          password: ${{ secrets.HOSTGATOR_PASSWORD }}
+          server-dir: ${{ secrets.REMOTE_PATH }}
+          protocol: ftps
