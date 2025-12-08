@@ -1,372 +1,391 @@
 <?php
-$hoje = date('d/m/Y'); // pega dia de hoje
-$idc = $_GET['idc'];
-$result_nomes = "SELECT * FROM tbclientes WHERE idc='$idc' LIMIT 1";
-$resultado_nomes = mysqli_query($conn, $result_nomes);
-$conta = mysqli_num_rows($resultado_nomes); // conta registro
-while($rows_nomes = mysqli_fetch_array($resultado_nomes)){
-    $nome = $rows_nomes['nome'];
+// Garante que variáveis essenciais existam
+$hoje = date('d/m/Y');
+// Pega o IDC do include pai ou da URL se necessário
+$idc = isset($idc) ? $idc : (isset($_GET['idc']) ? $_GET['idc'] : 0);
+
+// Busca nome do cliente se não vier do include
+if(!isset($nome) || empty($nome)){
+    // Conexão já deve existir do config.php incluído no pai
+    if($idc) {
+        $result_cli = mysqli_query($conn, "SELECT nome FROM tbclientes WHERE idc='$idc' LIMIT 1");
+        if($result_cli && $row_cli = mysqli_fetch_assoc($result_cli)){
+            $nome = $row_cli['nome'];
+        }
+    } else {
+        $nome = "Cliente não identificado";
+    }
 }
 ?>
+
 <style>
+    /* Ajustes para o Select2 parecer nativo do Bootstrap 5 */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-color: #dee2e6;
+    }
+    /* Garante que o dropdown do Select2 fique acima da Modal */
+    .select2-container {
+        z-index: 9999 !important;
+    }
+    /* Ajuste de altura da modal para telas pequenas */
     .modal-body {
-        max-height: 400px; /* Altura máxima da modal */
-        overflow-y: auto; /* Habilita rolagem vertical */
+        max-height: 70vh;
+        overflow-y: auto;
     }
-/* Inicialmente oculta o campo Select2 */
-.hide-select2 {
-    display: none;
-}
 </style>
-<form method="post" action="insert_ordens.php" enctype="multipart/form-data">
-    <input type="hidden" name="nome" value="<?php echo $nome; ?>">
-    <input type="hidden" name="log" value="<?php echo $log; ?>">
-    <input type="hidden" class="form-control" name="idc" value="<?php echo $idc; ?>">
-    <div class="form-group col-md-2">
-        <label for="inputlg">Data</label>
-        <input type="text" class="form-control" name="data" maxlength="15" value="<?php echo $hoje; ?>" id="dataordem" required="required" autocomplete="user-password">
-        <input type="hidden" class="form-control" name="status_ordem" maxlength="15" value="pendente" required="required" autocomplete="user-password">
-    </div>
-    <div class="col-md-12">
-        <button type="submit" class="btn btn-success btn-lg" title="Salvar Ordem"><i class="bi bi-save"> Criar Pedido</i></button>
-    </div>
-</form>
-<table class="table table-hover">
-<thead>
-    <tr>
-        <th width="10%" align="left">Data</th>
-        <th width="10%" align="left">Número Pedido</th>
-        <th width="10%" align="left">Status</th>
-        <th width="10%" align="left">Itens do Pedido</th>
-        <th width="10%" align="left">Login</th>
-        <th width="10%" align="center">Opções</th>
-    </tr>
-</thead>
-<?php
-$idc = $_GET['idc'];
-if (isset($_GET['pagina'])) {
-    $pagina = $_GET['pagina'];
-} else {
-    $pagina = 1;
-}
-$numerodepagina = 5;
-$offset = ($pagina - 1) * $numerodepagina;
 
-$total_paginas_sql = "SELECT COUNT(*) FROM tbordens";
-$result = mysqli_query($conn, $total_paginas_sql);
-$total_linhas = mysqli_fetch_array($result)[0];
-$total_paginas = ceil($total_linhas / $numerodepagina);
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <h6 class="card-title text-muted mb-3 fw-bold text-uppercase small"><i class="fas fa-plus-circle"></i> Novo Pedido</h6>
+        <form method="post" action="insert_ordens.php" class="row g-3 align-items-end">
+            <input type="hidden" name="nome" value="<?php echo $nome; ?>">
+            <input type="hidden" name="log" value="<?php echo isset($_SESSION['usuario']) ? $_SESSION['usuario'] : 'user'; ?>">
+            <input type="hidden" name="idc" value="<?php echo $idc; ?>">
+            <input type="hidden" name="status_ordem" value="pendente">
 
-$result_nomes = "SELECT * FROM tbordens WHERE idc='$idc' ORDER BY data DESC LIMIT $offset, $numerodepagina";
-$resultado_nomes = mysqli_query($conn, $result_nomes);
-while ($rows_nomes = mysqli_fetch_array($resultado_nomes)) {
-    $status_ordem = $rows_nomes['status_ordem'];
-    $ido = $rows_nomes['ido'];
-    $idc = $rows_nomes['idc'];
-    $logb = $rows_nomes['log'];
-    $datah = date('d/m/Y', strtotime($rows_nomes["data"]));
-    $status_class = '';
-    if ($status_ordem == 'pendente') {
-        $status_class = 'bg-warning';
-    } elseif ($status_ordem == 'concluido') {
-        $status_class = 'bg-success';
-    }
-
-
-    echo '<tbody>
-    <tr>
-        <td width="10%" align="left" valign="middle">' . date('d/m/Y H:i', strtotime($rows_nomes["data"])) . '</td>
-        <td width="10%" align="left">
-            <div class="modal fade" id="modalVerItens' . $rows_nomes["ido"] . '"  role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-         
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Itens do Pedido Nº ' . $rows_nomes["ido"] . '</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                                                    <table class="table table-hover" id="tabelaItens' . $rows_nomes["ido"] . '">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Quant</th>
-                                        <th>Preço Unit</th>
-                                        <th>Subtotal</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>';
-                                    $result_itens = "SELECT * FROM tbitens WHERE ido='$ido'";
-                                    $resultado_itens = mysqli_query($conn, $result_itens);
-                                    $totalGeral = 0;
-                                    while ($rows_itens = mysqli_fetch_array($resultado_itens)) {
-                                        $subtotal = $rows_itens['quantidade'] * $rows_itens['preco'];
-                                        $totalGeral += $subtotal;
-                                        echo '<tr id="item' . $rows_itens['idi'] . '">
-                                            <td>' . $rows_itens['descricao'] . '</td>
-                                            <td>' . $rows_itens['quantidade'] . '</td>
-                                            <td>R$ ' . number_format($rows_itens['preco'], 2, ',', '.') . '</td>
-                                            <td class="subtotal">R$ ' . number_format($subtotal, 2, ',', '.') . '</td>
-                                            <td><button class="btn btn-danger btn-sm btn-deletar" data-ido="' . $ido . '" data-idi="' . $rows_itens['idi'] . '">Deletar</button></td>
-                                        </tr>';
-                                    }
-                                echo '</tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="3" style="text-align:right">Total:</th>
-                                        <td id="total' . $rows_nomes["ido"] . '">R$ ' . number_format($totalGeral, 2, ',', '.') . '</td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                            <form id="formItens' . $ido . '" method="post">
-                                <input type="hidden" name="ido" value="' . $ido . '">
-                                <input type="hidden" name="idc" value="' . $idc . '">
-                               <div class="form-group">
-    <label for="descricao">Descrição:</label>
-    <select name="descricao" value="" class="tbproduto form-control" required></select>
-    
-</div>
-                                <div class="form-group">
-                                    <label for="quantidade">Quantidade:</label>
-                                    <input type="number" class="form-control" name="quantidade" value="1" required>
-                                </div>
-                                <div class="form-group">
-    <label for="preco">Preço:</label>
-    <input type="text" class="form-control valor" id="valor" name="preco" required>
-</div>
-                                <button type="button" class="btn btn-primary" onclick="submitForm(' . $ido . ')">Adicionar Item</button>
-                            </form>
-                        </div>
-                     <div class="modal-footer">
-                    <div style="text-align: center; display: inline-block;">
- <form id="formStatus' . $ido . '" method="post" action="update_status.php">
-                                <input type="hidden" name="ido" value="' . $ido . '">
-                                   <select style="background-color:'.$status_class.';inline-block; width: 150px;" class="form-control" name="status" id="status' . $rows_nomes['ido'] . '" onchange="updateStatus(' . $rows_nomes['ido'] . ')">
-                                        <option value="pendente" ' . ($rows_nomes['status_ordem'] == 'pendente' ? 'selected' : '') . '>Pendente</option>
-                                        <option value="concluido" ' . ($rows_nomes['status_ordem'] == 'concluido' ? 'selected' : '') . '>Concluído</option>
-                                    </select>
-                        
-                            </form>
-                            </div>
-
-                            <div style="text-align: center; display: inline-block;"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button></div>
-
-                            
-                    </div>
-                    </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small">Data</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="far fa-calendar-alt"></i></span>
+                    <input type="text" class="form-control" name="data" value="<?php echo $hoje; ?>" id="dataordem" required>
                 </div>
             </div>
-            Nº <a title="Ver Itens" data-toggle="modal" data-target="#modalVerItens' . $rows_nomes["ido"] . '">' . $rows_nomes["ido"] . '</a>
-        </td>
-        <td width="10%"><p align="left"><span class="btn '.$status_class.'">' . $rows_nomes["status_ordem"] . '</span>
-                            </td>
-        <td width="10%"><p align="left"><a title="Ver Itens" data-toggle="modal" data-target="#modalVerItens' . $rows_nomes["ido"] . '">Ver Itens</a></p></td>
-        <td width="10%"><p align="left">' . $rows_nomes["log"] . '</p></td>
-        <td width="10%">
-            <div class="btn-group">
-                <form method="post" name="dataForm" action="imprimir_pedido.php" target="_blank">
-                    <input type="hidden" name="ido" value="' . $rows_nomes['ido'] . '">
-                    <input type="hidden" name="nome" value="' . $nome . '">
-                    <input type="hidden" name="idc" value="' . $rows_nomes['idc'] . '">
-                    <button type="submit" title="Imprimir Histórico"><i class="bi bi-printer" style="color:blue"></i></button>
-                </form>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
+                    <i class="fas fa-check"></i> Criar Pedido
+                </button>
             </div>
-            <div class="btn-group">
-                <form method="post" id="form" name="dataForm" action="delete_ordens.php">
-                    <input type="hidden" name="nome" value="' . $rows_nomes['nome'] . '">
-                    <input type="hidden" name="idc" value="' . $rows_nomes['idc'] . '">
-                    <input type="hidden" name="ido" value="' . $rows_nomes['ido'] . '">
-                    <button type="submit" title="Deletar" onclick="return deleta_ordem();"><i class="bi bi-trash" style="color:red"></i></button>
-                </form>
-            </div>
-        </td>
-    </tr>
-    </tbody>';
-}
-echo '</table>';
-?>
+        </form>
+    </div>
+</div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white fw-bold py-3 border-bottom">
+        <i class="fas fa-list"></i> Lista de Pedidos
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th class="ps-3">Data</th>
+                <th>Nº Pedido</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Itens</th>
+                <th class="text-center">Usuário</th>
+                <th class="text-end pe-3">Opções</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            // Paginação
+            $numerodepagina = 5;
+            $offset = ($pagina - 1) * $numerodepagina;
+
+            // Se não tiver IDC, não busca nada (evita erro SQL)
+            if($idc) {
+                $sql_count = "SELECT COUNT(*) FROM tbordens WHERE idc='$idc'";
+                $res_count = mysqli_query($conn, $sql_count);
+                $row_count = mysqli_fetch_array($res_count);
+                $total_linhas = $row_count[0];
+                $total_paginas = ceil($total_linhas / $numerodepagina);
+
+                // Busca Pedidos
+                $sql_ordens = "SELECT * FROM tbordens WHERE idc='$idc' ORDER BY data DESC LIMIT $offset, $numerodepagina";
+                $res_ordens = mysqli_query($conn, $sql_ordens);
+            } else {
+                $total_paginas = 0;
+                $res_ordens = false;
+            }
+
+            if($res_ordens && mysqli_num_rows($res_ordens) > 0) {
+                while ($row = mysqli_fetch_array($res_ordens)) {
+                    $ido = $row['ido'];
+                    $status = $row['status_ordem'];
+
+                    // Badge de Status
+                    $badge_class = 'bg-secondary';
+                    if (stripos($status, 'pendente') !== false) $badge_class = 'bg-warning text-dark';
+                    if (stripos($status, 'concluido') !== false) $badge_class = 'bg-success';
+                    ?>
+                    <tr>
+                        <td class="ps-3"><?php echo date('d/m/Y H:i', strtotime($row["data"])); ?></td>
+                        <td class="fw-bold">#<?php echo $ido; ?></td>
+                        <td class="text-center">
+                            <span class="badge <?php echo $badge_class; ?> rounded-pill px-3"><?php echo ucfirst($status); ?></span>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalVerItens<?php echo $ido; ?>">
+                                <i class="fas fa-box-open"></i> Ver Itens
+                            </button>
+                        </td>
+                        <td class="text-center text-muted small"><?php echo $row["log"]; ?></td>
+                        <td class="text-end pe-3">
+                            <div class="btn-group">
+                                <form method="post" action="imprimir_pedido.php" target="_blank" class="d-inline">
+                                    <input type="hidden" name="ido" value="<?php echo $ido; ?>">
+                                    <input type="hidden" name="idc" value="<?php echo $idc; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Imprimir"><i class="fas fa-print"></i></button>
+                                </form>
+
+                                <form method="post" action="delete_ordens.php" class="d-inline" onsubmit="return confirm('Tem certeza que deseja EXCLUIR este pedido?');">
+                                    <input type="hidden" name="ido" value="<?php echo $ido; ?>">
+                                    <input type="hidden" name="idc" value="<?php echo $idc; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="modalVerItens<?php echo $ido; ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light">
+                                    <h5 class="modal-title"><i class="fas fa-clipboard-list"></i> Pedido #<?php echo $ido; ?></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body bg-light">
+
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body p-0">
+                                            <div id="tabelaItens<?php echo $ido; ?>">
+                                                <table class="table table-striped mb-0 table-sm align-middle">
+                                                    <thead class="table-secondary">
+                                                    <tr>
+                                                        <th class="ps-3">Item</th>
+                                                        <th class="text-center">Qtd</th>
+                                                        <th class="text-end">Valor</th>
+                                                        <th class="text-end">Subtotal</th>
+                                                        <th class="text-center">#</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <?php
+                                                    $sql_itens = "SELECT * FROM tbitens WHERE ido='$ido'";
+                                                    $res_itens = mysqli_query($conn, $sql_itens);
+                                                    $totalGeral = 0;
+                                                    if(mysqli_num_rows($res_itens) > 0) {
+                                                        while($item = mysqli_fetch_array($res_itens)){
+                                                            $subtotal = $item['quantidade'] * $item['preco'];
+                                                            $totalGeral += $subtotal;
+                                                            echo "<tr>
+                                                                <td class='ps-3'>{$item['descricao']}</td>
+                                                                <td class='text-center'>{$item['quantidade']}</td>
+                                                                <td class='text-end'>R$ ".number_format($item['preco'], 2, ',', '.')."</td>
+                                                                <td class='text-end fw-bold text-muted'>R$ ".number_format($subtotal, 2, ',', '.')."</td>
+                                                                <td class='text-center'>
+                                                                    <button type='button' class='btn btn-sm text-danger p-0 btn-deletar' data-ido='$ido' data-idi='{$item['idi']}'><i class='fas fa-times'></i></button>
+                                                                </td>
+                                                            </tr>";
+                                                        }
+                                                    } else {
+                                                        echo "<tr><td colspan='5' class='text-center py-3 text-muted small'>Nenhum item adicionado.</td></tr>";
+                                                    }
+                                                    ?>
+                                                    </tbody>
+                                                    <tfoot>
+                                                    <tr>
+                                                        <th colspan="3" class="text-end">Total Geral:</th>
+                                                        <th class="text-end fw-bold text-success">R$ <?php echo number_format($totalGeral, 2, ',', '.'); ?></th>
+                                                        <td></td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2 small text-uppercase text-primary">Adicionar Item</h6>
+                                            <form id="formItens<?php echo $ido; ?>" class="row g-2">
+
+                                                <input type="hidden" name="ido" value="<?php echo $ido; ?>">
+
+                                                <div class="col-md-6">
+                                                    <select name="descricao" class="form-select tbproduto" style="width: 100%;">
+                                                        <option value="">Buscar Produto...</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <input type="number" name="quantidade" class="form-control form-control-sm" value="1" placeholder="Qtd" min="1" required>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <input type="text" name="preco" class="form-control form-control-sm valor" id="preco<?php echo $ido; ?>" placeholder="R$ 0,00" required>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="submitForm(<?php echo $ido; ?>)">
+                                                        <i class="fas fa-plus"></i> Add
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer justify-content-between">
+                                    <form id="formStatus<?php echo $ido; ?>" class="d-flex align-items-center">
+                                        <input type="hidden" name="ido" value="<?php echo $ido; ?>">
+                                        <label class="me-2 fw-bold small text-muted">Status:</label>
+                                        <select name="status" class="form-select form-select-sm w-auto" onchange="updateStatus(<?php echo $ido; ?>)">
+                                            <option value="pendente" <?php echo ($status == 'pendente' ? 'selected' : ''); ?>>Pendente</option>
+                                            <option value="concluido" <?php echo ($status == 'concluido' ? 'selected' : ''); ?>>Concluído</option>
+                                        </select>
+                                    </form>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                } // Fim While
+            } else {
+                echo '<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fas fa-folder-open fa-2x mb-2"></i><br>Nenhum pedido encontrado.</td></tr>';
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if($total_paginas > 1): ?>
+        <div class="card-footer bg-white py-3">
+            <nav aria-label="Navegação">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <?php
+                    for ($i = 1; $i <= $total_paginas; $i++) {
+                        $active = ($i == $pagina) ? 'active' : '';
+                        echo '<li class="page-item '.$active.'"><a class="page-link" href="?pagina='.$i.'&idc='.$idc.'">'.$i.'</a></li>';
+                    }
+                    ?>
+                </ul>
+            </nav>
+        </div>
+    <?php endif; ?>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-function submitForm(ido) {
-  var descricao = $('.tbproduto').val();
-    if (!descricao) {
-        alert('Por favor, selecione um produto válido.');
-        return; // Cancela o envio do formulário se a descrição estiver vazia
-    }
+    $(document).ready(function() {
 
-    setTimeout(function() {
-        var formData = $("#formItens" + ido).serialize();
-        console.log(formData); // Verifica os dados antes de enviar
+        // 1. Carregar produtos UMA vez para memória (evita múltiplas requisições)
+        var produtosData = [];
+        $.ajax({
+            url: 'buscar_produtos.php',
+            dataType: 'json',
+            data: { term: '' },
+            success: function(data) {
+                // Formata para o padrão do Select2
+                produtosData = data.map(function(item) {
+                    return {
+                        id: item.produto, // Valor a enviar
+                        text: item.produto,  // Texto a exibir
+                        valor: item.valor // Dado extra
+                    };
+                });
+            }
+        });
+
+        // 2. Inicializar Select2 APENAS quando a modal abrir
+        // Isso corrige o problema do campo de busca travado
+        $('.modal').on('shown.bs.modal', function () {
+            var modal = $(this);
+            var select = modal.find('.tbproduto');
+
+            // Se já não estiver inicializado
+            if (!select.hasClass("select2-hidden-accessible")) {
+                select.select2({
+                    dropdownParent: modal, // ESSENCIAL: Vincula o dropdown à modal
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    data: produtosData, // Usa os dados carregados
+                    placeholder: "Selecione um produto",
+                    allowClear: true
+                });
+
+                // Evento ao selecionar: Preencher Preço
+                select.on('select2:select', function (e) {
+                    var data = e.params.data;
+                    // Acha o campo de preço vizinho dentro do mesmo formulário
+                    var form = $(this).closest('form');
+                    form.find('.valor').val(data.valor);
+                });
+            }
+        });
+    });
+
+    // FUNÇÕES AJAX (Modernizadas)
+
+    // Adicionar Item
+    function submitForm(ido) {
+        var form = $("#formItens" + ido);
+        var produto = form.find('.tbproduto').val();
+
+        if (!produto) {
+            alert('Por favor, selecione um produto.');
+            return;
+        }
 
         $.ajax({
             type: 'POST',
             url: 'insert_itens_ajax.php',
-            data: formData,
+            data: form.serialize(),
             success: function(response) {
-                if(response === "success") {
-                    alert('Item adicionado com sucesso!');
-
+                if(response.trim() === "success") {
+                    // Atualiza a tabela chamando o arquivo PHP externo
                     recarregarTabelaItens(ido);
-                    $("#formItens" + ido)[0].reset(); // Limpa o formulário
 
-                    // Limpa o Select2 para evitar o envio de valores antigos
-                    $('.tbproduto').val(null).trigger('change.select2');
+                    // Limpa os campos
+                    form.find('.tbproduto').val(null).trigger('change');
+                    form.find('input[name="quantidade"]').val(1);
+                    form.find('input[name="preco"]').val('');
                 } else {
-                    alert('Ocorreu um erro ao adicionar o item.');
+                    alert('Erro ao adicionar: ' + response);
                 }
             },
             error: function() {
-                alert('Ocorreu um erro ao adicionar o item.');
+                alert('Erro de conexão ao adicionar item.');
             }
         });
-    }, 200); // Ajuste o tempo de atraso se necessário
-}
+    }
 
-function recarregarTabelaItens(ido) {
-    $.ajax({
-        url: 'recarregar_tabela_itens.php', // Arquivo PHP que retorna o HTML da tabela
-        type: 'GET',
-        data: { ido: ido },
-        success: function(response) {
-            // Substituir o conteúdo da tabela pelo novo conteúdo
-            $("#tabelaItens" + ido).html(response);
-        }
-    });
-}
+    // Recarregar Tabela
+    function recarregarTabelaItens(ido) {
+        $.get('recarregar_tabela_itens.php', { ido: ido }, function(data) {
+            $("#tabelaItens" + ido).html(data);
+        });
+    }
 
-// Função para deletar item
-$(document).on('click', '.btn-deletar', function() {
-    var ido = $(this).data('ido');
-    var idi = $(this).data('idi');
+    // Deletar Item
+    $(document).on('click', '.btn-deletar', function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var idi = btn.data('idi');
+        var ido = btn.data('ido');
 
-    $.ajax({
-        url: 'delete_item.php',
-        type: 'POST',
-        data: { idi: idi },
-        success: function(response) {
-            if(response === "success") {
-                alert('Item deletado com sucesso!');
+        if(!confirm("Remover este item?")) return;
+
+        $.post('delete_item.php', { idi: idi }, function(resp) {
+            if(resp.trim() === "success") {
                 recarregarTabelaItens(ido);
             } else {
-                alert('Ocorreu um erro ao deletar o item.');
+                alert("Erro ao deletar.");
             }
-        }
-    });
-});
-
-function atualizarTotais(ido) {
-    var totalGeral = 0;
-
-    $("#tabelaItens" + ido + " tbody tr").each(function() {
-        var subtotalStr = $(this).find(".subtotal").text().replace('R$', '').trim().replace('.', '').replace(',', '.');
-        var subtotal = parseFloat(subtotalStr);
-
-        // Verificar se subtotal é um número válido
-        if (!isNaN(subtotal)) {
-            totalGeral += subtotal;
-        }
+        });
     });
 
-    $("#total" + ido).text("Total: R$ " + totalGeral.toFixed(2).replace('.', ','));
-}
-
-// Função para enviar o formulário de atualização de status via AJAX e fechar o modal
-function updateStatus(ido) {
-    var form = document.getElementById('formStatus' + ido);
-    var formData = new FormData(form);
-
-    fetch('update_status.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        if (data.trim() === "success") {
-            alert('Status atualizado com sucesso!');
-
-            // Atualiza o status na tabela principal
-            var novoStatus = $("#formStatus" + ido + " select[name='status']").val();
-            $("#modalVerItens" + ido).modal('hide'); // Fecha o modal
-            location.reload(); // Opcional: Recarrega a página para garantir atualização dos dados
-        } else {
-            alert('Erro ao atualizar o status.');
-        }
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-    });
-}
-</script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Inicializa o Select2 logo no carregamento da página
-    $('.tbproduto').select2();
-
-    // Aplica estilos diretamente via jQuery
-    $('.tbproduto').next('.select2-container').css({
-        'width': '100%',        // Define a largura do Select2
-        'height': '40px',       // Define a altura do Select2
-    });
-
-    // Estilos adicionais para ajustar a altura e o padding interno
-    $('.tbproduto').next('.select2-container').find('.select2-selection').css({
-        'height': '40px',       // Define a altura do campo de seleção
-        'padding-top': '4px',   // Ajusta o espaçamento interno superior
-        'padding-bottom': '4px' // Ajusta o espaçamento interno inferior
-    });
-
-    $('.tbproduto').next('.select2-container').find('.select2-selection__rendered').css({
-        'line-height': '1.5',   // Ajusta a altura da linha para centralizar o texto
-        'padding-top': '4px',   // Ajusta o espaçamento interno superior do texto
-        'padding-bottom': '8px' // Ajusta o espaçamento interno inferior do texto
-    });
-
-    // Carrega os produtos assim que a página é carregada
-    $.ajax({
-        url: 'buscar_produtos.php',
-        dataType: 'json',
-        data: { term: '' },
-        success: function(data) {
-            $('.tbproduto').empty().append('<option value="">Selecione um produto</option>');
-            $.each(data, function(index, item) {
-                $('.tbproduto').append(
-                    $('<option>', { 
-                        value: item.produto, // ID do produto
-                        text: item.text, // Nome do produto
-                        'data-preco': item.valor // Preço do produto
-                    })
-                );
-            });
-
-            // Atualiza o Select2 com as novas opções
-            $('.tbproduto').trigger('change');
-
-            // Abre o dropdown do Select2 automaticamente
-            //$('#tbproduto').select2('open');
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.log('Erro ao buscar os produtos: ', textStatus, errorThrown);
-            alert('Erro ao buscar os produtos.');
-        }
-    });
-
-    $('.tbproduto').change(function() {
-        var preco = $(this).find(':selected').data('preco');
-        var produto = $(this).find(':selected').text();
-
-        $('#valor').val(preco);
-        $('.tbproduto').val(produto);
-    });
-});
+    // Atualizar Status
+    function updateStatus(ido) {
+        var form = $("#formStatus" + ido);
+        $.post('update_status.php', form.serialize(), function(data) {
+            if(data.trim() === "success") {
+                // Recarrega a página para atualizar o badge na tabela principal
+                location.reload();
+            } else {
+                alert('Erro ao atualizar status.');
+            }
+        });
+    }
 </script>

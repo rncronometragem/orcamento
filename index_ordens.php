@@ -22,9 +22,9 @@ $offset = ($pagina - 1) * $numerodepagina;
 
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAdicionar">
+                <a type="button" href="form_pedido_novo.php" class="btn btn-success shadow-sm" >
                     <i class="fas fa-plus-circle"></i> Novo Pedido
-                </button>
+                </a>
             </div>
         </div>
 
