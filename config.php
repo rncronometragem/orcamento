@@ -1,9 +1,13 @@
 <?php
+
+include_once 'load_env.php';
+
+
  // alterar
- $servidor = "localhost";
- $dbusuario = "thia8868_orcamento";
- $dbsenha = "orcamentorncrono123";
- $dbname = "thia8868_orcamentos";
+ $servidor = $_ENV['DB_HOST'] ?? "localhost";
+ $dbusuario = $_ENV['DB_USER'] ?? "root";
+ $dbsenha = $_ENV['DB_PASS'] ?? "";
+ $dbname = $_ENV['DB_NAME'] ?? "orcamento";
  // fim
 $conn = mysqli_connect($servidor, $dbusuario, $dbsenha, $dbname);
  mysqli_set_charset($conn, "utf8mb4");

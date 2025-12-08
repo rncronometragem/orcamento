@@ -1,148 +1,188 @@
-<?php include_once "session.php"; ?>
-<?php include_once "config.php"; ?>
-<?php include_once "cabecalho.php"; ?>
-<?php include_once "calendar.php"; ?>
-<html>
-<head>
-    <title>Cadastro de Clientes</title>
-</head>
-<body>
-<script>
-function show_delall() {
-    if (confirm("!!! MUITA ATENÇÃO !!! Deseja deletar esse Cliente? Ao deletar você vai apagar também os todos históricos desse Cliente e NÃO TEM como recuperar os dados depois."))
-        document.forms[0].submit();
-    else
-        return false;
-}
-</script>
-<br>
-<div class="container-fluid">
-<h4><a href="" data-toggle="modal" data-target="#produtoModal" title="Produto"><i class="bi bi-card-list"></i> Adicionar </a></h4>
+<?php
+include_once "session.php";
+include_once "config.php";
+include_once "cabecalho.php";
+// include_once "calendar.php"; // Desnecessário aqui
 
-<!-- Modal para adicionar produto -->
-<div class="modal fade" id="produtoModal" tabindex="-1" role="dialog" aria-labelledby="produtoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="produtoModalLabel">Adicionar Produto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+// Definição de paginação
+$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+$numerodepagina = 15; // Itens por página
+$offset = ($pagina - 1) * $numerodepagina;
+?>
+
+    <div class="container my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-secondary mb-0"><i class="fas fa-boxes"></i> Produtos e Serviços</h2>
+                <p class="text-muted small mb-0">Gerencie seu catálogo de itens.</p>
             </div>
-            <div class="modal-body">
-                <form method="post" action="insert_produtos.php">
-                    <div class="form-group">
-                        <label for="produto">Descrição</label>
-                        <input type="text" class="form-control" id="produto" name="produto" placeholder="Produto ou serviço">
+            <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAdicionar">
+                <i class="fas fa-plus-circle"></i> Novo Produto
+            </button>
+        </div>
+
+        <div class="modal fade" id="modalAdicionar" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="fas fa-plus"></i> Adicionar Item</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="form-group">
-                        <label for="valor">Valor</label>
-                        <input type="text" class="form-control valor" name="valor" placeholder="Valor do produto">
+                    <div class="modal-body">
+                        <form method="post" action="insert_produtos.php" autocomplete="off">
+                            <div class="mb-3">
+                                <label for="produto" class="form-label fw-bold">Descrição do Produto/Serviço</label>
+                                <input type="text" class="form-control" name="produto" placeholder="Ex: Formatação, Peça X..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="valor" class="form-label fw-bold">Valor (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="text" class="form-control valor" name="valor" placeholder="0,00" required>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-success">Salvar</button>
+                            </div>
+                        </form>
                     </div>
-               
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar</button>
-                    </div>
-                </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col" class="ps-4" style="width: 50%;">Descrição</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col" class="text-center">Data Cadastro</th>
+                            <th scope="col" class="text-center">Cadastrado por</th>
+                            <th scope="col" class="text-end pe-4">Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        // Conexão e Paginação
+                        $conn = mysqli_connect($servidor, $dbusuario, $dbsenha, $dbname);
+                        mysqli_set_charset($conn, "utf8");
+
+                        $total_paginas_sql = "SELECT COUNT(*) FROM tbprodutos";
+                        $result_count = mysqli_query($conn, $total_paginas_sql);
+                        $row_count = mysqli_fetch_array($result_count);
+                        $total_linhas = $row_count[0];
+                        $total_paginas = ceil($total_linhas / $numerodepagina);
+
+                        $sql = "SELECT * FROM tbprodutos ORDER BY produto ASC LIMIT $offset, $numerodepagina";
+                        $resgata_dados = mysqli_query($conn, $sql);
+
+                        if (mysqli_num_rows($resgata_dados) > 0) {
+                            while ($linha = mysqli_fetch_array($resgata_dados)) {
+                                $idp = $linha["idp"];
+                                $valor_formatado = number_format($linha['valor'], 2, ',', '.');
+                                $data_formatada = date('d/m/Y', strtotime($linha['data']));
+                                ?>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">
+                                        <a href="#" class="text-decoration-none text-dark" data-bs-toggle="modal" data-bs-target="#modalEditar<?php echo $idp; ?>">
+                                            <?php echo $linha["produto"]; ?>
+                                        </a>
+                                    </td>
+                                    <td class="text-success fw-bold">R$ <?php echo $valor_formatado; ?></td>
+                                    <td class="text-center text-muted small"><?php echo $data_formatada; ?></td>
+                                    <td class="text-center text-muted small">
+                                        <i class="fas fa-user-tag"></i> <?php echo $linha["log"]; ?>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditar<?php echo $idp; ?>" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <form method="post" action="delete_produto.php" class="d-inline" onsubmit="return confirm('Tem certeza que deseja EXCLUIR este produto?');">
+                                                <input type="hidden" name="idp" value="<?php echo $idp; ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="modalEditar<?php echo $idp; ?>" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title"><i class="fas fa-edit"></i> Editar Produto</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="post" action="update_produtos.php" autocomplete="off">
+                                                    <input type="hidden" name="idp" value="<?php echo $idp; ?>">
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Descrição</label>
+                                                        <input type="text" class="form-control" name="produto" value="<?php echo $linha["produto"]; ?>" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Valor</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">R$</span>
+                                                            <input type="text" class="form-control valor" name="valor" value="<?php echo $valor_formatado; ?>" required>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php
+                            }
+                        } else {
+                            echo '<tr><td colspan="5" class="text-center py-5 text-muted">Nenhum produto cadastrado.</td></tr>';
+                        }
+                        mysqli_close($conn);
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white py-3">
+                <nav aria-label="Navegação">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item <?php if($pagina <= 1){ echo 'disabled'; } ?>">
+                            <a class="page-link" href="<?php if($pagina > 1){ echo "?pagina=".($pagina - 1); } else { echo "#"; } ?>">Anterior</a>
+                        </li>
+
+                        <?php
+                        for ($i = 1; $i <= $total_paginas; $i++) {
+                            if ($i == 1 || $i == $total_paginas || ($i >= $pagina - 2 && $i <= $pagina + 2)) {
+                                $active = ($i == $pagina) ? 'active' : '';
+                                echo '<li class="page-item '.$active.'"><a class="page-link" href="?pagina='.$i.'">'.$i.'</a></li>';
+                            } elseif ($i == $pagina - 3 || $i == $pagina + 3) {
+                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+                        }
+                        ?>
+
+                        <li class="page-item <?php if($pagina >= $total_paginas){ echo 'disabled'; } ?>">
+                            <a class="page-link" href="<?php if($pagina < $total_paginas){ echo "?pagina=".($pagina + 1); } else { echo "#"; } ?>">Próximo</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
-</div>
 
-<table class="table table-hover" style="width:auto;">
-  <thead>
-    <tr>
-       <th width="60%" style="text-align:left;">Descrição</th>
-       <th width="auto" style="text-align:left;">Valor</th>
-       <th width="15%" style="text-align:left;">Data</th>
-       <th width="15%" style="text-align:left;">Usuário</th>
-       <th width="auto" style="text-align:left;">Delete</th>
-     </tr>
-   </thead>
-   <tbody>
-    <?php
-
-    $mes = date("m"); // pega mês atual
-    $hojea = date('d/m'); // pega dia de hoje
-
-    if (isset($_GET['pagina'])) {
-        $pagina = $_GET['pagina'];
-    } else {
-        $pagina = 1;
-    }
-    $numerodepagina = 15;
-    $offset = ($pagina - 1) * $numerodepagina;
-
-    $conn = mysqli_connect($servidor, $dbusuario, $dbsenha, $dbname);
-    mysqli_set_charset($conn, "utf8");
-    // Check connection
-    if (mysqli_connect_errno()) {
-        echo "Conexao falhou: " . mysqli_connect_error();
-        die();
-    }
-    $total_paginas_sql = "SELECT COUNT(*) FROM tbprodutos";
-    $result = mysqli_query($conn, $total_paginas_sql);
-    $total_linhas = mysqli_fetch_array($result)[0];
-    $total_paginas = ceil($total_linhas / $numerodepagina);
-    $sql = "SELECT * FROM tbprodutos ORDER BY produto ASC LIMIT $offset, $numerodepagina";
-    $resgata_dados = mysqli_query($conn, $sql);
-    while ($linha = mysqli_fetch_array($resgata_dados)) {
-        // Modal para editar produto
-        echo '<div class="modal fade" id="produtoModalEditar' . $linha["idp"] . '" tabindex="-1" role="dialog" aria-labelledby="produtoModalLabel' . $linha["idp"] . '" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="produtoModalLabel' . $linha["idp"] . '">Editar Produto</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="post" action="update_produtos.php">
-                                <input type="hidden" name="idp" value="' . $linha["idp"] . '">
-                                <div class="form-group">
-                                    <label for="produto">Descrição</label>
-                                    <input type="text" class="form-control" id="produto" name="produto" value="' . $linha["produto"] . '" placeholder="Produto ou serviço">
-                                </div>
-                                <div class="form-group">
-                                    <label for="valor">Valor</label>
-                                    <input type="text" class="form-control valor"  name="valor" value="' . number_format($linha['valor'], 2, ',', '.') . '" placeholder="Valor do produto">
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">Salvar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>';
-
-        echo '<tr>
-                <td width="60%" style="text-align:left"><a href="" data-toggle="modal" data-target="#produtoModalEditar' . $linha["idp"] . '" title="Editar">' . $linha["produto"] . '</a></td>
-                <td width="auto" style="text-align:left">' . number_format($linha['valor'], 2, ',', '.') . '</td>
-                <td width="15%" style="text-align:left">' . date('d/m/Y', strtotime($linha['data'])) . '</td>
-                <td width="15%" style="text-align:left">' . $linha["log"] . '</td>
-                <td width="auto" style="text-align:left"><form method="post" id="form" name="dataForm" action="delete_produto.php">
-                   <input type="hidden" name="idp" value="' . $linha['idp'] . '">
-                   <button type="submit" title="Deletar" onclick="return deleta_produto();"><i class="bi bi-trash" style="color:red"></i></button>
-                </form></td>
-             </tr>';
-    }
-    ?>
-   </tbody>
-</table>
-</div>
-<?php
-    mysqli_close($conn);
-?>
-<!-- Incluindo jQuery e Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-<?php include_once "paginar.php"; ?>
 <?php include_once "rodape.php"; ?>
-</body>
-</html>
