@@ -60,12 +60,28 @@ $hoje = date('d/m/Y');
                                 </select>
                                 <div class="form-text">Comece a digitar para pesquisar na lista.</div>
                             </div>
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Data do Registro</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="far fa-calendar-alt"></i></span>
+                                        <input type="text" class="form-control" name="data" value="<?php echo $hoje; ?>" id="dataordem" required>
+                                    </div>
+                                </div>
 
-                            <div class="mb-4">
-                                <label for="data" class="form-label fw-bold">Data do Pedido</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white"><i class="far fa-calendar-alt"></i></span>
-                                    <input type="text" class="form-control" name="data" id="data" value="<?php echo $hoje; ?>" required>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small">Nome do Evento</label>
+                                    <input type="text" class="form-control" name="nome_evento" placeholder="Ex: Casamento Silva" required>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Data do Evento</label>
+                                    <input type="date" class="form-control" name="data_evento">
+                                </div>
+
+                                <div class="col-md-9">
+                                    <label class="form-label fw-bold small">Local do Evento</label>
+                                    <input type="text" class="form-control" name="local_evento" placeholder="Ex: Salão de Festas Central">
                                 </div>
                             </div>
 

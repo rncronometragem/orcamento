@@ -60,6 +60,18 @@ if (isset($_POST['ido'])) {
         <div class="pedido-info">
             <p><strong>Data Emissão:</strong> <?php echo date('d/m/Y H:i', strtotime($pedido['data'])); ?></p>
             <p><strong>Status:</strong> <?php echo $pedido['status_ordem']; ?></p>
+
+            <hr> <p><strong>Evento:</strong> <?php echo $pedido['nome_evento']; ?></p>
+            <p><strong>Data do Evento:</strong>
+                <?php
+                if(!empty($pedido['data_evento']) && $pedido['data_evento'] != '0000-00-00'){
+                    echo date('d/m/Y', strtotime($pedido['data_evento']));
+                } else {
+                    echo " - ";
+                }
+                ?>
+            </p>
+            <p><strong>Local:</strong> <?php echo $pedido['local_evento']; ?></p>
         </div>
 <style type="text/css">
 .descricao-col {

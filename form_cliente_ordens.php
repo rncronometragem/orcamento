@@ -44,11 +44,26 @@ if(!isset($nome) || empty($nome)){
             <input type="hidden" name="status_ordem" value="pendente">
 
             <div class="col-md-3">
-                <label class="form-label fw-bold small">Data</label>
+                <label class="form-label fw-bold small">Data do Registro</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white"><i class="far fa-calendar-alt"></i></span>
                     <input type="text" class="form-control" name="data" value="<?php echo $hoje; ?>" id="dataordem" required>
                 </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small">Nome do Evento</label>
+                <input type="text" class="form-control" name="nome_evento" placeholder="Ex: Casamento Silva" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small">Data do Evento</label>
+                <input type="date" class="form-control" name="data_evento">
+            </div>
+
+            <div class="col-md-9">
+                <label class="form-label fw-bold small">Local do Evento</label>
+                <input type="text" class="form-control" name="local_evento" placeholder="Ex: Salão de Festas Central">
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
@@ -148,48 +163,48 @@ if(!isset($nome) || empty($nome)){
                                     <div class="card border-0 shadow-sm mb-3">
                                         <div class="card-body p-0">
                                             <div id="tabelaItens<?php echo $ido; ?>">
-                                                <table class="table table-striped mb-0 table-sm align-middle">
-                                                    <thead class="table-secondary">
-                                                    <tr>
-                                                        <th class="ps-3">Item</th>
-                                                        <th class="text-center">Qtd</th>
-                                                        <th class="text-end">Valor</th>
-                                                        <th class="text-end">Subtotal</th>
-                                                        <th class="text-center">#</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <?php
-                                                    $sql_itens = "SELECT * FROM tbitens WHERE ido='$ido'";
-                                                    $res_itens = mysqli_query($conn, $sql_itens);
-                                                    $totalGeral = 0;
-                                                    if(mysqli_num_rows($res_itens) > 0) {
-                                                        while($item = mysqli_fetch_array($res_itens)){
-                                                            $subtotal = $item['quantidade'] * $item['preco'];
-                                                            $totalGeral += $subtotal;
-                                                            echo "<tr>
-                                                                <td class='ps-3'>{$item['descricao']}</td>
-                                                                <td class='text-center'>{$item['quantidade']}</td>
-                                                                <td class='text-end'>R$ ".number_format($item['preco'], 2, ',', '.')."</td>
-                                                                <td class='text-end fw-bold text-muted'>R$ ".number_format($subtotal, 2, ',', '.')."</td>
-                                                                <td class='text-center'>
-                                                                    <button type='button' class='btn btn-sm text-danger p-0 btn-deletar' data-ido='$ido' data-idi='{$item['idi']}'><i class='fas fa-times'></i></button>
-                                                                </td>
-                                                            </tr>";
-                                                        }
-                                                    } else {
-                                                        echo "<tr><td colspan='5' class='text-center py-3 text-muted small'>Nenhum item adicionado.</td></tr>";
-                                                    }
-                                                    ?>
-                                                    </tbody>
-                                                    <tfoot>
-                                                    <tr>
-                                                        <th colspan="3" class="text-end">Total Geral:</th>
-                                                        <th class="text-end fw-bold text-success">R$ <?php echo number_format($totalGeral, 2, ',', '.'); ?></th>
-                                                        <td></td>
-                                                    </tr>
-                                                    </tfoot>
-                                                </table>
+<!--                                                <table class="table table-striped mb-0 table-sm align-middle">-->
+<!--                                                    <thead class="table-secondary">-->
+<!--                                                    <tr>-->
+<!--                                                        <th class="ps-3">Item</th>-->
+<!--                                                        <th class="text-center">Qtd</th>-->
+<!--                                                        <th class="text-end">Valor</th>-->
+<!--                                                        <th class="text-end">Subtotal</th>-->
+<!--                                                        <th class="text-center">#</th>-->
+<!--                                                    </tr>-->
+<!--                                                    </thead>-->
+<!--                                                    <tbody>-->
+<!--                                                    --><?php
+//                                                    $sql_itens = "SELECT * FROM tbitens WHERE ido='$ido'";
+//                                                    $res_itens = mysqli_query($conn, $sql_itens);
+//                                                    $totalGeral = 0;
+//                                                    if(mysqli_num_rows($res_itens) > 0) {
+//                                                        while($item = mysqli_fetch_array($res_itens)){
+//                                                            $subtotal = $item['quantidade'] * $item['preco'];
+//                                                            $totalGeral += $subtotal;
+//                                                            echo "<tr>
+//                                                                <td class='ps-3'>{$item['descricao']}</td>
+//                                                                <td class='text-center'>{$item['quantidade']}</td>
+//                                                                <td class='text-end'>R$ ".number_format($item['preco'], 2, ',', '.')."</td>
+//                                                                <td class='text-end fw-bold text-muted'>R$ ".number_format($subtotal, 2, ',', '.')."</td>
+//                                                                <td class='text-center'>
+//                                                                    <button type='button' class='btn btn-sm text-danger p-0 btn-deletar' data-ido='$ido' data-idi='{$item['idi']}'><i class='fas fa-times'></i></button>
+//                                                                </td>
+//                                                            </tr>";
+//                                                        }
+//                                                    } else {
+//                                                        echo "<tr><td colspan='5' class='text-center py-3 text-muted small'>Nenhum item adicionado.</td></tr>";
+//                                                    }
+//                                                    ?>
+<!--                                                    </tbody>-->
+<!--                                                    <tfoot>-->
+<!--                                                    <tr>-->
+<!--                                                        <th colspan="3" class="text-end">Total Geral:</th>-->
+<!--                                                        <th class="text-end fw-bold text-success">R$ --><?php //echo number_format($totalGeral, 2, ',', '.'); ?><!--</th>-->
+<!--                                                        <td></td>-->
+<!--                                                    </tr>-->
+<!--                                                    </tfoot>-->
+<!--                                                </table>-->
                                             </div>
                                         </div>
                                     </div>
@@ -237,6 +252,8 @@ if(!isset($nome) || empty($nome)){
                             </div>
                         </div>
                     </div>
+
+
                     <?php
                 } // Fim While
             } else {
