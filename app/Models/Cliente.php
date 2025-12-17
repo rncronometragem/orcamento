@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Cliente extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['nome', 'documento', 'tipo_pessoa', 'observacoes'];
+
+    public function enderecos()
+    {
+        return $this->hasMany(Endereco::class);
+    }
+
+    public function contatos()
+    {
+        return $this->hasMany(Contato::class);
+    }
+}

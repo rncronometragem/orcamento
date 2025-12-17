@@ -1,4 +1,0 @@
-Criar o banco de dados no seu cpanel/phpmyadmin com o nome 
-'cadastros' com colação utf8mdb4_general_ci e importe 
-orcamento2.sql que contem as tabelas para o banco criado.
-leia o arquivo instrucoes.txt que está na raiz.
