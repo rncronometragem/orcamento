@@ -1,6 +1,13 @@
 <?php
 
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ConfiguracaoController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\OrcamentoController;
+use App\Http\Controllers\ProdutoController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +20,44 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/login', [LoginController::class, 'create'])->name('login');
+Route::post('/login', [LoginController::class, 'store']);
+Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+    Route::get('/clientes/novo', [ClienteController::class, 'create'])->name('clientes.create');
+    Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
+    Route::get('/clientes/{id}/editar', [ClienteController::class, 'edit'])->name('clientes.edit');
+    Route::put('/clientes/{id}', [ClienteController::class, 'update'])->name('clientes.update');
+    Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
+
+    Route::prefix('produtos')->name('produtos.')->group(function () {
+        Route::get('/', [ProdutoController::class, 'index'])->name('index');
+        Route::get('/novo', [ProdutoController::class, 'create'])->name('create');
+        Route::post('/', [ProdutoController::class, 'store'])->name('store');
+        Route::get('/{produto}/editar', [ProdutoController::class, 'edit'])->name('edit');
+        Route::put('/{produto}', [ProdutoController::class, 'update'])->name('update');
+        Route::delete('/{produto}', [ProdutoController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('orcamentos')->name('orcamentos.')->group(function () {
+        Route::get('/', [OrcamentoController::class, 'index'])->name('index');
+        Route::get('/novo', [OrcamentoController::class, 'create'])->name('create');
+        Route::post('/', [OrcamentoController::class, 'store'])->name('store');
+        Route::get('/{id}/editar', [OrcamentoController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [OrcamentoController::class, 'update'])->name('update');
+        Route::delete('/{id}', [OrcamentoController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('orcamentos', App\Http\Controllers\OrcamentoController::class);
+
+    Route::get('/configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
+
+    Route::post('/configuracoes', [ConfiguracaoController::class, 'update'])->name('configuracoes.update');
 });

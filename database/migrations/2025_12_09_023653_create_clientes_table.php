@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('nome', 200);
             $table->string('categoria_nome', 50)->nullable();
-            $table->string('tipo_doc', 10)->nullable(); // CPF ou CNPJ
+            $table->string('tipo_pessoa', 50)->nullable();
+            $table->string('tipo_doc', 10)->nullable();
             $table->string('documento', 30)->nullable();
             $table->text('obs')->nullable();
             $table->string('status', 50)->nullable();
             $table->string('usuario_log', 50)->nullable();
+            $table->timestamps();
         });
     }
 

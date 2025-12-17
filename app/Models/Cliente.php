@@ -9,19 +9,15 @@ class Cliente extends Model
 {
     use HasFactory;
 
-    protected $table = 'clientes';
+    protected $fillable = ['nome', 'documento', 'tipo_pessoa', 'observacoes'];
 
-    protected $fillable = [
-        'nome', 'categoria_nome', 'tipo_doc', 'documento',
-        'cep', 'rua', 'cidade', 'bairro', 'uf',
-        'email', 'telefone', 'celular', 'obs', 'status', 'usuario_log'
-    ];
-
-    public function ordens() {
-        return $this->hasMany(Ordem::class, 'cliente_id');
+    public function enderecos()
+    {
+        return $this->hasMany(Endereco::class);
     }
 
-    public function historicos() {
-        return $this->hasMany(Historico::class, 'cliente_id');
+    public function contatos()
+    {
+        return $this->hasMany(Contato::class);
     }
 }

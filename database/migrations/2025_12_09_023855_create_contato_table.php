@@ -11,11 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contato', function (Blueprint $table) {
+        Schema::create('contatos', function (Blueprint $table) {
             $table->id();
-            $table->string('email', 150)->nullable();
-            $table->string('telefone', 15)->nullable();
-            $table->string('celular', 15)->nullable();
+            $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
+
+            // Exemplo: 'Financeiro', 'Comercial' ou 'Principal'
+            $table->string('departamento')->nullable();
+
+            $table->string('email')->nullable();
+            $table->string('telefone')->nullable();
+            $table->string('celular')->nullable();
+
             $table->timestamps();
         });
     }
@@ -25,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contato');
+        Schema::dropIfExists('contatos');
     }
 };
