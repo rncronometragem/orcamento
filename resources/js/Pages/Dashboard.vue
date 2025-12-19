@@ -1,7 +1,6 @@
 <template>
     <AppLayout>
         <template #header>
-            <h1>teste</h1>
         </template>
         <div class="p-6 bg-gray-100 min-h-screen">
 

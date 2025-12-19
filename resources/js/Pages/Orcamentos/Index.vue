@@ -60,6 +60,7 @@ const statusClasses = (status) => {
                     <td class="p-4 text-right font-bold text-gray-700">{{ formatarMoeda(orc.valor_total) }}</td>
                     <td class="p-4 text-center space-x-2">
                         <Link :href="`/orcamentos/${orc.id}/editar`" class="text-blue-600 hover:underline">Editar</Link>
+                        <Link :href="`/proposta/${orc.hash}`" class="text-blue-600 hover:underline">Compartilhar</Link>
                     </td>
                 </tr>
                 </tbody>

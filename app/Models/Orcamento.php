@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Orcamento extends Model
 {
-    protected $fillable = ['cliente_id', 'status', 'valor_total', 'observacoes'];
+    protected $fillable = ['cliente_id', 'status', 'valor_total', 'observacoes', 'hash', 'user_id'];
 
     // Um orçamento pertence a um cliente
     public function cliente() {

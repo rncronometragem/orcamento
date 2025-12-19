@@ -31,6 +31,11 @@
 
                 <div class="border-t border-slate-700 my-4"></div>
 
+                <Link href="/empresa" :class="{'bg-slate-700 text-white': $page.url.startsWith('/empresa')}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
+                    <span class="mr-3 text-lg">🏢</span>
+                    Minha Empresa
+                </Link>
+
                 <Link href="/configuracoes" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
                     <span class="mr-3 text-lg">⚙️</span>
                     Configurações
@@ -55,7 +60,7 @@
             </div>
 
                 <div class="flex items-center">
-                    <span class="text-sm text-gray-600 mr-2">Olá, Admin</span>
+                    <span class="text-sm text-gray-600 mr-2">Olá, {{ $page.props.auth.user.name }}</span>
                     <div class="h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">A</div>
                 </div>
             </header>

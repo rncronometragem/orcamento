@@ -7,6 +7,9 @@ use App\Models\OrcamentoItem;
 use App\Models\Cliente;
 use App\Models\Produto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
@@ -17,9 +20,9 @@ class OrcamentoController extends Controller
         $search = $request->input('search');
 
         $orcamentos = Orcamento::query()
-            ->with('cliente') // Carrega o nome do cliente
+            ->where("user_id", Auth::id())
+            ->with('cliente')
             ->when($search, function ($query, $search) {
-                // Busca pelo ID do orçamento ou nome do cliente
                 $query->where('id', $search)
                     ->orWhereHas('cliente', function($q) use ($search) {
                         $q->where('nome', 'like', "%{$search}%");
@@ -48,17 +51,16 @@ class OrcamentoController extends Controller
         $dados = $this->validarOrcamento($request);
 
         DB::transaction(function () use ($dados) {
-            // 1. Cria o Cabeçalho
             $orcamento = Orcamento::create([
                 'cliente_id' => $dados['cliente_id'],
                 'status' => $dados['status'],
                 'observacoes' => $dados['observacoes'],
-                'valor_total' => 0 // Será calculado abaixo
+                'user_id' => Auth::id(),
+                'valor_total' => 0
             ]);
 
             $totalGeral = 0;
 
-            // 2. Cria os Itens
             foreach ($dados['itens'] as $item) {
                 $subtotal = $item['quantidade'] * $item['preco_unitario'];
                 $totalGeral += $subtotal;
@@ -71,7 +73,10 @@ class OrcamentoController extends Controller
                 ]);
             }
 
-            // 3. Atualiza o total
+            $orcamento->update([
+                'hash' => (string) Str::uuid(),
+            ]);
+
             $orcamento->update(['valor_total' => $totalGeral]);
         });
 

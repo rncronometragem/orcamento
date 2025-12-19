@@ -3,9 +3,12 @@
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrcamentoController;
+use App\Http\Controllers\OrcamentoPublicoController;
 use App\Http\Controllers\ProdutoController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,6 +30,11 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+
+// Rota pública usando um hash ou uuid
+Route::get('/proposta/{hash}', [OrcamentoPublicoController::class, 'show'])->name('orcamento.publico');
+// Rota para o cliente aprovar/rejeitar
+Route::post('/proposta/{hash}/responder', [OrcamentoPublicoController::class, 'responder'])->name('orcamento.responder');
 
 Route::middleware('auth')->group(function () {
     Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
@@ -60,4 +68,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
 
     Route::post('/configuracoes', [ConfiguracaoController::class, 'update'])->name('configuracoes.update');
+
+    Route::get('/empresa', [EmpresaController::class, 'index'])->name('empresa.index');
+
+    // Rota POST para salvar (no controller ele trata como update)
+    Route::post('/empresa', [EmpresaController::class, 'update'])->name('empresa.update');
+
+    Route::prefix('configuracoes')->name('configuracoes.')->group(function () {
+       Route::get('/migrate', function () {
+           Artisan::call('migrate', ['--force' => true]);
+
+           return '<h1>Migrations rodadas com sucesso!</h1><pre>' . Artisan::output() . '</pre>';
+       })->name('index');
+    });
 });
