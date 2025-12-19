@@ -45,6 +45,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp          # Tente 'ftp' simples primeiro (evita o erro de handshake SSL)
+          security: loose
           server-dir: /test-deploy/ # CUIDADO: Ajuste para a pasta correta na hospedagem
           exclude: |
             **/.git*
