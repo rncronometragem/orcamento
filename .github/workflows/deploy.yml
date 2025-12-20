@@ -24,7 +24,7 @@ jobs:
       # 3. Instala dependências do PHP (Composer)
       # A flag --no-dev evita instalar pacotes de teste em produção
       - name: 📦 Install PHP Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --no-dev --optimize-autoloader --classmap-authoritative
 
       # --- SOLUÇÃO 1: COMPACTAR VENDOR ---
       # Cria um arquivo vendor.zip para subir 1 arquivo em vez de 5000
