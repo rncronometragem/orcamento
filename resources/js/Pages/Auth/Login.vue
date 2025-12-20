@@ -18,7 +18,7 @@ const submit = () => {
         <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
 
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800">Orçamento<span class="text-blue-600">Sys</span></h1>
+                <h1 class="text-3xl font-bold text-gray-800">Orçamentoteste<span class="text-blue-600">Sys</span></h1>
                 <p class="text-gray-500 text-sm mt-2">Entre para acessar o sistema</p>
             </div>
 
