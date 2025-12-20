@@ -89,5 +89,13 @@ Route::middleware('auth')->group(function () {
 
            return '<pre>' . Artisan::output() . '</pre>';
        })->name('rollback');
+
+        // Adicione isso no web.php temporariamente
+        Route::get('/limpar-cache', function() {
+            Artisan::call('view:clear');
+            Artisan::call('route:clear');
+            return 'Cache de views e rotas limpo!';
+        });
     });
+
 });
