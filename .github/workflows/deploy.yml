@@ -45,7 +45,7 @@ jobs:
           rm -rf node_modules # Removemos node_modules para não subir via FTP (pesado demais)
 
       - name: 🤐 Zip Build Folder
-        run: zip -r build.zip public/build/
+        run: cd public && zip -r build.zip build/
 
       # 5. Envia os arquivos via FTP
       - name: 📂 Sync files via FTP
