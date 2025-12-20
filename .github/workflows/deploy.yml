@@ -44,6 +44,9 @@ jobs:
           npm run build
           rm -rf node_modules # Removemos node_modules para não subir via FTP (pesado demais)
 
+      - name: 🤐 Zip Build Folder
+        run: zip -r build.zip public/build/
+
       # 5. Envia os arquivos via FTP
       - name: 📂 Sync files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
