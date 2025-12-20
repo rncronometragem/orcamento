@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orcamentos', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
         });
 
         Schema::table('empresas', function (Blueprint $table) {
-           $table->foreignId('user_id')->nullable()->constrained('users');
+           $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
         });
 
         Schema::table('clientes', function (Blueprint $table) {
-           $table->foreignId('user_cadastro_id')->nullable()->constrained('users');
+           $table->foreignId('user_cadastro_id')->nullable()->constrained('users')->onDelete('cascade');
         });
     }
 

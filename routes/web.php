@@ -80,5 +80,11 @@ Route::middleware('auth')->group(function () {
 
            return '<h1>Migrations rodadas com sucesso!</h1><pre>' . Artisan::output() . '</pre>';
        })->name('index');
+
+       Route::get('migrate-rollback', function () {
+           Artisan::call('migrate:rollback');
+
+           return '<pre>' . Artisan::output() . '</pre>';
+       })->name('rollback');
     });
 });
