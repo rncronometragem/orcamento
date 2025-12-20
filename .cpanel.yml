@@ -1,4 +1,3 @@
----
 deployment:
   tasks:
     # 1. Define a pasta de destino (ajuste 'SEU_USUARIO')
