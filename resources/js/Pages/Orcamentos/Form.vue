@@ -39,7 +39,10 @@ const aoSelecionarProduto = (index, event) => {
     const produtoId = event.target.value;
     if (!produtoId) return;
 
-    const prod = props.produtos.find(p => p.id == produtoId);
+    console.log(produtoId);
+
+    const prod = props.produtos.find(p => p.id === produtoId);
+    console.log(prod);
     if (prod) {
         form.itens[index].descricao = prod.nome;
         form.itens[index].preco_unitario = parseFloat(prod.valor);
