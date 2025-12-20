@@ -1,6 +1,7 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { route } from 'ziggy-js';
 
 const props = defineProps({
     orcamento: Object,
@@ -17,20 +18,17 @@ const enviarResposta = (status) => {
     if (!confirm(`Tem certeza que deseja ${status === 'aprovado' ? 'APROVAR' : 'REJEITAR'} este orçamento?`)) return;
 
     form.status = status;
-    form.post(route('orcamento.responder', props.orcamento.uuid));
+    form.post(route('orcamentos.responder', props.orcamento.hash));
 };
 
-// Formatar moeda
 const formatMoney = (value) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
-// Formatar data
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('pt-BR');
 };
 
-// Calcular total (caso não venha do backend)
 const totalGeral = computed(() => {
     return props.orcamento.itens.reduce((acc, item) => acc + (item.quantidade * item.preco_unitario), 0);
 });
@@ -59,7 +57,7 @@ const totalGeral = computed(() => {
                         </span>
                     </div>
                 </div>
-                <div class="text-right">
+                <div class="text-right" v-if="empresa">
                     <div class="h-16 w-16 bg-slate-600 rounded mb-2 ml-auto flex items-center justify-center">Logo</div>
                     <h2 class="font-semibold text-lg">{{ empresa.nome }}</h2>
                     <p class="text-sm text-slate-300">{{ empresa.email }}</p>
@@ -79,14 +77,15 @@ const totalGeral = computed(() => {
                         <span class="text-gray-500 uppercase text-xs font-bold tracking-wider">Data de Emissão:</span>
                         <span class="ml-2 font-medium">{{ formatDate(orcamento.created_at) }}</span>
                     </div>
-                    <div>
+                    <div >
                         <span class="text-gray-500 uppercase text-xs font-bold tracking-wider">Validade:</span>
-                        <span class="ml-2 font-medium text-red-600">{{ formatDate(orcamento.validade) }}</span>
+                        <span v-if="orcamento.data_expiracao" class="ml-2 font-medium text-red-600">{{ formatDate(orcamento.data_expiracao) }}</span>
+                        <span v-else> Sem prazo</span>
                     </div>
                 </div>
             </div>
 
-            <div class="p-8">
+            <div class="p-8" v-if="orcamento.pode_ver_unitarios">
                 <h3 class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-4">Itens / Serviços</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -151,14 +150,14 @@ const totalGeral = computed(() => {
             </div>
 
             <div v-if="orcamento.status === 'aprovado'" class="p-8 bg-green-50 text-center border-t border-green-100">
-                <p class="text-green-800 font-medium text-lg">Este orçamento foi aprovado em {{ formatDate(orcamento.updated_at) }}.</p>
+                <p class="text-green-800 font-medium text-lg">Este orçamento foi aprovado em {{ formatDate(orcamento.data_resposta) }}.</p>
                 <p class="text-green-600 text-sm mt-1">Entraremos em contato em breve para iniciar o serviço.</p>
             </div>
 
         </div>
 
         <div class="max-w-4xl mx-auto text-center mt-8 text-gray-400 text-sm">
-            &copy; {{ new Date().getFullYear() }} {{ empresa.nome }}. Todos os direitos reservados.
+            &copy; {{ new Date().getFullYear() }} {{ (empresa) ? empresa.nome : "OrçamentoSYS" }}. Todos os direitos reservados.
         </div>
     </div>
 </template>

@@ -32,6 +32,18 @@
                 <h2 class="text-xl font-bold text-right">Total: R$ {{ totalCalculado }}</h2>
             </div>
 
+            <div class="mt-4">
+                <input
+                    type="checkbox"
+                    id="exibir_unitario"
+                    v-model="form.exibir_unitario"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                >
+                <label for="exibir_unitario" class="text-sm font-medium text-gray-700 cursor-pointer">
+                    Cliente pode ver orçamento unitário?
+                </label>
+            </div>
+
             <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded mt-4 w-full" :disabled="form.processing">
                 Finalizar Orçamento
             </button>
@@ -50,6 +62,7 @@ const props = defineProps({
 
 const form = useForm({
     cliente_id: '',
+    exibir_unitario: false,
     itens: [
         { descricao: '', quantidade: 1, preco: 0 } // Começa com um item vazio
     ]

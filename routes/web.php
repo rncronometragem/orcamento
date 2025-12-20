@@ -32,9 +32,12 @@ Route::get('/', function () {
 });
 
 // Rota pública usando um hash ou uuid
-Route::get('/proposta/{hash}', [OrcamentoPublicoController::class, 'show'])->name('orcamento.publico');
+Route::get('/proposta/{hash}', [OrcamentoPublicoController::class, 'show'])->name('orcamentos.publico');
 // Rota para o cliente aprovar/rejeitar
-Route::post('/proposta/{hash}/responder', [OrcamentoPublicoController::class, 'responder'])->name('orcamento.responder');
+Route::post('/proposta/{hash}/responder', [OrcamentoPublicoController::class, 'responder'])->name('orcamentos.responder');
+
+Route::post('/orcamentos/responder/{hash}', [OrcamentoPublicoController::class, 'responder'])->name('orcamentos.responder');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');

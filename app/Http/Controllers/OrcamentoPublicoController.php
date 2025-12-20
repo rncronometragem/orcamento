@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Empresa;
 use App\Models\Orcamento;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,14 +17,22 @@ class OrcamentoPublicoController extends Controller
             ->with(['cliente', 'itens']) // Carrega relacionamentos
             ->firstOrFail();
 
+        $empresa = Empresa::where("user_id", $orcamento->user_id)->first();
+
         return Inertia::render('Orcamentos/ExibeOrcamentoCliente', [
             'orcamento' => $orcamento,
-            'empresa' => [ // Dados da sua empresa (pode vir do config ou banco)
-                'nome' => 'Sua Empresa Tech',
-                'logo' => null,
-                'email' => 'contato@suaempresa.com',
-                'telefone' => '(11) 99999-9999'
-            ]
+            'empresa' => $empresa
         ]);
+    }
+
+    public function responder($hash, Request $request)
+    {
+        $orcamento = Orcamento::where("hash", $hash)->firstOrFail();
+
+        $orcamento->status = $request->input("status");
+
+        $orcamento->data_resposta = Carbon::now();
+
+        $orcamento->save();
     }
 }

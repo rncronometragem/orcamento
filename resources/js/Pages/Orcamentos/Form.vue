@@ -6,7 +6,7 @@ import { computed, watch } from 'vue';
 const props = defineProps({
     orcamento: Object,
     clientes: Array,
-    produtos: Array // Lista de produtos para o dropdown inteligente
+    produtos: Array
 });
 
 const isEditing = computed(() => !!props.orcamento);
@@ -16,6 +16,8 @@ const form = useForm({
     cliente_id: props.orcamento?.cliente_id || '',
     status: props.orcamento?.status || 'pendente',
     observacoes: props.orcamento?.observacoes || '',
+    // ADICIONADO: Inicializa com o valor do banco ou false se for novo
+    pode_ver_unitarios: props.orcamento?.pode_ver_unitarios ?? false,
     itens: props.orcamento?.itens || [
         { descricao: '', quantidade: 1, preco_unitario: 0, produto_temp: '' }
     ]
@@ -23,19 +25,16 @@ const form = useForm({
 
 // === LÓGICA DE ITENS ===
 
-// Adicionar nova linha
 const addItem = () => {
     form.itens.push({ descricao: '', quantidade: 1, preco_unitario: 0, produto_temp: '' });
 };
 
-// Remover linha
 const removeItem = (index) => {
     if (form.itens.length > 1) {
         form.itens.splice(index, 1);
     }
 };
 
-// Quando seleciona um produto no dropdown, preenche a linha
 const aoSelecionarProduto = (index, event) => {
     const produtoId = event.target.value;
     if (!produtoId) return;
@@ -43,14 +42,13 @@ const aoSelecionarProduto = (index, event) => {
     const prod = props.produtos.find(p => p.id == produtoId);
     if (prod) {
         form.itens[index].descricao = prod.nome;
-        form.itens[index].preco_unitario = parseFloat(prod.valor); // ou 'valor' se for o nome da coluna
-        form.itens[index].produto_temp = ''; // Reseta o select para não ficar marcado
+        form.itens[index].preco_unitario = parseFloat(prod.valor);
+        form.itens[index].produto_temp = '';
     }
 };
 
 // === CÁLCULOS ===
 
-// Calcula Total Geral (Apenas visual, o backend recalcula por segurança)
 const totalGeral = computed(() => {
     return form.itens.reduce((acc, item) => {
         return acc + (item.quantidade * item.preco_unitario);
@@ -149,7 +147,20 @@ const submit = () => {
                     </div>
                 </div>
 
-                <div class="flex justify-end items-center mt-6 pt-4 border-t border-gray-200">
+                <div class="flex flex-col md:flex-row justify-between items-end md:items-center mt-6 pt-4 border-t border-gray-200">
+
+                    <div class="flex items-center gap-2 mb-4 md:mb-0">
+                        <input
+                            id="pode_ver_unitarios"
+                            type="checkbox"
+                            v-model="form.pode_ver_unitarios"
+                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        >
+                        <label for="pode_ver_unitarios" class="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                            Cliente pode ver orçamento unitário?
+                        </label>
+                    </div>
+
                     <div class="text-right">
                         <span class="text-gray-500 text-lg mr-4">Total Geral:</span>
                         <span class="text-3xl font-bold text-blue-700">{{ formatarMoeda(totalGeral) }}</span>
