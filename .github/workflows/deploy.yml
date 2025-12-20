@@ -70,6 +70,7 @@ jobs:
             .env.example
             README.md
             **/vendor/**
+            bootstrap/cache/*.php  # <--- ADICIONE ESTA LINHA (Remove caches do upload)
 
       # --- PASSO FINAL: DESCOMPACTAR NO SERVIDOR ---
       # Chama um script PHP que você deixará no servidor para deszipar o vendor
