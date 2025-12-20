@@ -56,4 +56,4 @@ jobs:
             **/tests/**
             .env.example
             README.md
-            **/node_modules/**
+            **/vendor/**
