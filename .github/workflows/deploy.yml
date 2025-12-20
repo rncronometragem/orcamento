@@ -44,13 +44,6 @@ jobs:
           npm run build
           rm -rf node_modules # Removemos node_modules para não subir via FTP (pesado demais)
 
-      # --- SOLUÇÃO 2: MOVER PASTA BUILD ---
-      # Move a pasta build gerada para dentro de uma pasta public_html (simulando a estrutura do servidor)
-      # Ajuste o comando abaixo conforme a estrutura exata que você precisa
-      - name: 📂 Move Build Assets
-        run: |
-          cp -r public/build ../public_html/
-
       # 5. Envia os arquivos via FTP
       - name: 📂 Sync files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -71,6 +64,13 @@ jobs:
             README.md
             **/vendor/**
             bootstrap/cache/*.php  # <--- ADICIONE ESTA LINHA (Remove caches do upload)
+
+      # --- SOLUÇÃO 2: MOVER PASTA BUILD ---
+      # Move a pasta build gerada para dentro de uma pasta public_html (simulando a estrutura do servidor)
+      # Ajuste o comando abaixo conforme a estrutura exata que você precisa
+      - name: 📂 Move Build Assets
+        run: |
+          cp -r public/build ../public_html/
 
       # --- PASSO FINAL: DESCOMPACTAR NO SERVIDOR ---
       # Chama um script PHP que você deixará no servidor para deszipar o vendor
