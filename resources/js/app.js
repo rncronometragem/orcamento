@@ -5,7 +5,7 @@ import '../css/app.css';
 import { ZiggyVue} from "ziggy-js";
 import { Ziggy } from './ziggy.js';
 
-// ADICIONE ESTA LINHA:
+Ziggy.url = window.location.origin
 window.Ziggy = Ziggy; // <--- Agora o route() importado achará as rotas
 
 createInertiaApp({
