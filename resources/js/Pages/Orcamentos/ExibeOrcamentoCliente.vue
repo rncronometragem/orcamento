@@ -1,7 +1,8 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { route } from 'ziggy-js';
+import {Ziggy} from "@/ziggy.js";
+import {route} from "ziggy-js";
 
 const props = defineProps({
     orcamento: Object,
