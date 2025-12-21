@@ -5,6 +5,9 @@ import '../css/app.css';
 import { ZiggyVue} from "ziggy-js";
 import { Ziggy } from './ziggy.js';
 
+// ADICIONE ESTA LINHA:
+window.Ziggy = Ziggy; // <--- Agora o route() importado achará as rotas
+
 createInertiaApp({
     resolve: name => {
         const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
