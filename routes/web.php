@@ -96,6 +96,11 @@ Route::middleware('auth')->group(function () {
             Artisan::call('route:clear');
             return 'Cache de views e rotas limpo!';
         });
+
+        Route::get('/ziggy-generate', function() {
+            Artisan::call('ziggy:generate');
+            return 'Ziggy gerado com sucesso!';
+        });
     });
 
 });
