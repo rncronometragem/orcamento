@@ -59,7 +59,9 @@ const totalGeral = computed(() => {
                     </div>
                 </div>
                 <div class="text-right" v-if="empresa">
-                    <div class="h-16 w-16 bg-slate-600 rounded mb-2 ml-auto flex items-center justify-center">Logo</div>
+                    <div class="h-16 w-16 bg-slate-600 rounded mb-2 ml-auto flex items-center justify-center">
+                        <img :src="'/storage/' + empresa.logo ">
+                    </div>
                     <h2 class="font-semibold text-lg">{{ empresa.nome }}</h2>
                     <p class="text-sm text-slate-300">{{ empresa.email }}</p>
                     <p class="text-sm text-slate-300">{{ empresa.telefone }}</p>

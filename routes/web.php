@@ -40,12 +40,15 @@ Route::post('/orcamentos/responder/{hash}', [OrcamentoPublicoController::class, 
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
-    Route::get('/clientes/novo', [ClienteController::class, 'create'])->name('clientes.create');
-    Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
-    Route::get('/clientes/{id}/editar', [ClienteController::class, 'edit'])->name('clientes.edit');
-    Route::put('/clientes/{id}', [ClienteController::class, 'update'])->name('clientes.update');
-    Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
+
+    Route::prefix('/clientes')->name('clientes.')->group(function () {
+        Route::get('/', [ClienteController::class, 'index'])->name('index');
+        Route::get('/novo', [ClienteController::class, 'create'])->name('create');
+        Route::post('', [ClienteController::class, 'store'])->name('store');
+        Route::get('/{id}/editar', [ClienteController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ClienteController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ClienteController::class, 'destroy'])->name('destroy');
+    });
 
     Route::prefix('produtos')->name('produtos.')->group(function () {
         Route::get('/', [ProdutoController::class, 'index'])->name('index');
@@ -65,19 +68,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [OrcamentoController::class, 'destroy'])->name('destroy');
     });
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('orcamentos', App\Http\Controllers\OrcamentoController::class);
-
-    Route::get('/configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
-
-    Route::post('/configuracoes', [ConfiguracaoController::class, 'update'])->name('configuracoes.update');
-
-    Route::get('/empresa', [EmpresaController::class, 'index'])->name('empresa.index');
-
-    // Rota POST para salvar (no controller ele trata como update)
-    Route::post('/empresa', [EmpresaController::class, 'update'])->name('empresa.update');
-
     Route::prefix('configuracoes')->name('configuracoes.')->group(function () {
+
+        Route::get('/', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
+        Route::post('/', [ConfiguracaoController::class, 'update'])->name('configuracoes.update');
+
        Route::get('/migrate', function () {
            Artisan::call('migrate', ['--force' => true]);
 
@@ -90,11 +85,15 @@ Route::middleware('auth')->group(function () {
            return '<pre>' . Artisan::output() . '</pre>';
        })->name('rollback');
 
-        // Adicione isso no web.php temporariamente
         Route::get('/limpar-cache', function() {
             Artisan::call('view:clear');
             Artisan::call('route:clear');
             return 'Cache de views e rotas limpo!';
+        });
+
+        Route::get('/link-storage', function() {
+            Artisan::call('storage:link');
+            return '<pre>' . Artisan::output() . '</pre>';
         });
 
         Route::get('/ziggy-generate', function() {
@@ -103,4 +102,10 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('orcamentos', App\Http\Controllers\OrcamentoController::class);
+
+    Route::get('/empresa', [EmpresaController::class, 'index'])->name('empresa.index');
+
+    Route::post('/empresa', [EmpresaController::class, 'update'])->name('empresa.update');
 });
