@@ -1,30 +1,36 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
+import { vMaska } from 'maska/vue';
 
 const form = useForm({
     nome: '',
     documento: '',
-    tipo_pessoa: 'juridica', // Valor padrão
+    tipo_pessoa: 'juridica',
 
-    // Lista inicial com 1 endereço vazio para o usuário preencher
     enderecos: [
         { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: '' }
     ],
 
-    // Lista inicial com 1 contato vazio
     contatos: [
         { departamento: '', email: '', celular: '' }
     ]
 });
 
-// === FUNÇÕES DE ENDEREÇO ===
+const options = {
+    fisica: {
+        mask: ['###.###.###-##']
+    },
+    juridica: {
+        mask: ['##.###.###/####-##']
+    }
+};
+
 function adicionarEndereco() {
     form.enderecos.push({ cep: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: '' });
 }
 
 function removerEndereco(index) {
-    // Impede remover se só tiver 1 sobrando
     if (form.enderecos.length > 1) {
         form.enderecos.splice(index, 1);
     } else {
@@ -32,7 +38,6 @@ function removerEndereco(index) {
     }
 }
 
-// === FUNÇÕES DE CONTATO ===
 function adicionarContato() {
     form.contatos.push({ departamento: '', email: '', celular: '' });
 }
@@ -41,7 +46,6 @@ function removerContato(index) {
     form.contatos.splice(index, 1);
 }
 
-// === ENVIO ===
 function salvar() {
     form.post('/clientes', {
         onSuccess: () => {
@@ -76,14 +80,21 @@ function salvar() {
                         </div>
 
                         <div class="md:col-span-1">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Documento (CPF/CNPJ)</label>
-                            <input v-model="form.documento" type="text" class="w-full border rounded p-2" placeholder="Digite apenas números">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" v-if="form.tipo_pessoa === 'fisica'">CPF</label>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" v-else>CNPJ</label>
+                            <input
+                                v-model="form.documento"
+                                v-maska="options[form.tipo_pessoa]"
+                                type="text"
+                                class="w-full border rounded p-2"
+                                placeholder="Digite apenas números">
                             <div v-if="form.errors.documento" class="text-red-500 text-xs mt-1">{{ form.errors.documento }}</div>
                         </div>
 
                         <div class="md:col-span-1">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Nome / Razão Social</label>
-                            <input v-model="form.nome" type="text" class="w-full border rounded p-2" required>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" v-if="form.tipo_pessoa === 'fisica'">Nome</label>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" v-else>Razão Social</label>
+                            <input v-model="form.nome" type="text" class="w-full border rounded p-2" required :placeholder="form.tipo_pessoa === 'fisica' ? 'Nome do Cliente' : 'Nome da Empresa'">
                             <div v-if="form.errors.nome" class="text-red-500 text-xs mt-1">{{ form.errors.nome }}</div>
                         </div>
                     </div>

@@ -104,19 +104,19 @@ const submit = () => {
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="md:col-span-3">
                                         <label class="block text-sm font-medium text-gray-700">Razão Social / Nome</label>
-                                        <input v-model="form.nome" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.nome" type="text" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">CNPJ</label>
-                                        <input v-model="form.cnpj" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.cnpj" type="text" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Insc. Estadual</label>
-                                        <input v-model="form.insc_estadual" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.insc_estadual" type="text" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Website</label>
-                                        <input v-model="form.site" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.site" type="text" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                 </div>
                             </div>
@@ -126,15 +126,15 @@ const submit = () => {
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Email</label>
-                                        <input v-model="form.email" type="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.email" type="email" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Telefone Fixo</label>
-                                        <input v-model="form.telefone" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.telefone" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Celular / WhatsApp</label>
-                                        <input v-model="form.celular" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.celular" type="text" class="mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2" />
                                     </div>
                                 </div>
                             </div>
@@ -144,31 +144,31 @@ const submit = () => {
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">CEP</label>
-                                        <input v-model="form.cep" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.cep" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700">Rua / Logradouro</label>
-                                        <input v-model="form.rua" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.rua" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Número</label>
-                                        <input v-model="form.numero" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.numero" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Bairro</label>
-                                        <input v-model="form.bairro" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.bairro" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Complemento</label>
-                                        <input v-model="form.complemento" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.complemento" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Cidade</label>
-                                        <input v-model="form.cidade" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                        <input v-model="form.cidade" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">UF</label>
-                                        <input v-model="form.uf" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" maxLength="2" />
+                                        <input v-model="form.uf" type="text" class="p-2 mt-1 block w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500" maxLength="2" />
                                     </div>
                                 </div>
                             </div>
