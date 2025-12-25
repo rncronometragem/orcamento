@@ -58,6 +58,8 @@ class OrcamentoController extends Controller
                 'user_id' => Auth::id(),
                 'valor_total' => 0,
                 'pode_ver_unitarios' => $dados['pode_ver_unitarios'],
+                'data_evento' => $dados['data_evento'],
+                'local_evento' => $dados['local_evento'],
             ]);
 
             $totalGeral = 0;
@@ -154,6 +156,8 @@ class OrcamentoController extends Controller
             'itens.*.quantidade' => 'required|integer|min:1',
             'itens.*.preco_unitario' => 'required|numeric|min:0',
             'pode_ver_unitarios' => 'nullable|boolean',
+            'data_evento' => 'nullable|date',
+            'local_evento' => 'nullable|string',
         ], [
             'itens.required' => 'Adicione pelo menos um item ao orçamento.',
         ]);

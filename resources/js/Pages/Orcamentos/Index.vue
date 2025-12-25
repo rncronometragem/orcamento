@@ -39,25 +39,34 @@ const statusClasses = (status) => {
             <table class="w-full text-left">
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                 <tr>
-                    <th class="p-4">ID</th>
-                    <th class="p-4">Cliente</th>
-                    <th class="p-4">Data</th>
-                    <th class="p-4">Status</th>
-                    <th class="p-4 text-right">Total</th>
+                    <th class="p-4 text-center">Cliente</th>
+                    <th class="p-4 text-center">Status</th>
+                    <th class="p-4 text-center">Total</th>
+                    <th class="p-4 text-center">Data do Evento</th>
+                    <th class="p-4 text-center">Local do Evento</th>
                     <th class="p-4 text-center">Ações</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y">
                 <tr v-for="orc in orcamentos.data" :key="orc.id" class="hover:bg-gray-50">
-                    <td class="p-4 font-bold">#{{ orc.id }}</td>
-                    <td class="p-4">{{ orc.cliente.nome }}</td>
-                    <td class="p-4 text-sm text-gray-500">{{ new Date(orc.created_at).toLocaleDateString() }}</td>
-                    <td class="p-4">
-                <span :class="statusClasses(orc.status)" class="px-2 py-1 rounded text-xs font-bold uppercase">
-                    {{ orc.status }}
-                </span>
+                    <td class="p-4 text-center">{{ orc.cliente.nome }}</td>
+                    <td class="p-4 text-center">
+                        <span :class="statusClasses(orc.status)" class="px-2 py-1 rounded text-xs font-bold uppercase">
+                            {{ orc.status }}
+                        </span>
                     </td>
-                    <td class="p-4 text-right font-bold text-gray-700">{{ formatarMoeda(orc.valor_total) }}</td>
+                    <td class="p-4 text-center font-bold text-gray-700">{{ formatarMoeda(orc.valor_total) }}</td>
+                    <td class="p-4 text-center">
+                        <label v-if="orc.data_evento">
+                            {{ new Date(orc.data_evento).toLocaleDateString() }}
+                        </label>
+                        <label v-else>
+                            -
+                        </label>
+                    </td>
+                    <td class="p-4 text-center">
+                        {{ orc.local_evento ? orc.local_evento : '-'}}
+                    </td>
                     <td class="p-4 text-center space-x-2">
                         <Link :href="`/orcamentos/${orc.id}/editar`" class="text-blue-600 hover:underline">Editar</Link>
                         <Link :href="`/proposta/${orc.hash}`" class="text-blue-600 hover:underline">Compartilhar</Link>

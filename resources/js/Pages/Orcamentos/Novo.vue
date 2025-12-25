@@ -4,6 +4,13 @@
 
         <form @submit.prevent="salvar">
 
+            <h3 class="font-bold mt-6 mb-2">Itens do Pedido</h3>
+
+            <div>
+                <input type="text" name="" placeholder="Local do evento"/>
+                <input type="text" name="" placeholder="Data do evento"/>
+            </div>
+
             <div class="mb-4">
                 <label class="block font-bold">Cliente</label>
                 <select v-model="form.cliente_id" class="border p-2 w-full">

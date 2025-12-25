@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('orcamentos', function (Blueprint $table) {
+            $table->timestamp('created_at')->nullable()->after('pode_ver_unitarios')->change();
+            $table->timestamp('updated_at')->nullable()->after('created_at')->change();
+            $table->timestamp('deleted_at')->nullable()->after('updated_at');
+        });
+
+        Schema::table('clientes', function (Blueprint $table) {
+            $table->timestamp('created_at')->nullable()->after('user_cadastro_id')->change();
+            $table->timestamp('updated_at')->nullable()->after('created_at')->change();
+        });
+
+        Schema::table('empresas', function (Blueprint $table) {
+            $table->timestamp('created_at')->nullable()->after('user_id')->change();
+            $table->timestamp('updated_at')->nullable()->after('created_at')->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+
+    }
+};

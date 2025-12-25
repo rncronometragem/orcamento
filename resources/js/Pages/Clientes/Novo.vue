@@ -26,6 +26,10 @@ const options = {
     }
 };
 
+const optionCelular = {
+    mask: ['(##) # ####-####']
+}
+
 function adicionarEndereco() {
     form.enderecos.push({ cep: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: '' });
 }
@@ -159,7 +163,7 @@ function salvar() {
                             <input v-model="contato.email" type="email" placeholder="Email" class="w-full border p-2 rounded text-sm">
                         </div>
                         <div class="flex-1">
-                            <input v-model="contato.celular" placeholder="Celular / WhatsApp" class="w-full border p-2 rounded text-sm" required>
+                            <input v-model="contato.celular" v-maska="optionCelular" placeholder="Celular / WhatsApp" class="w-full border p-2 rounded text-sm" required>
                             <div v-if="form.errors[`contatos.${index}.celular`]" class="text-red-500 text-xs">{{ form.errors[`contatos.${index}.celular`] }}</div>
                         </div>
                         <button type="button" @click="removerContato(index)" class="text-red-500 font-bold p-2 hover:bg-red-50 rounded">

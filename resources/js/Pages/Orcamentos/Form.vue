@@ -20,7 +20,9 @@ const form = useForm({
     pode_ver_unitarios: props.orcamento?.pode_ver_unitarios ?? false,
     itens: props.orcamento?.itens || [
         { descricao: '', quantidade: 1, preco_unitario: 0, produto_temp: '' }
-    ]
+    ],
+    data_evento: props.orcamento?.data_evento || '',
+    local_evento: props.orcamento?.local_evento || '',
 });
 
 // === LÓGICA DE ITENS ===
@@ -72,6 +74,16 @@ const submit = () => {
 
         <form @submit.prevent="submit" class="max-w-6xl mx-auto py-6 space-y-6">
 
+            <div class="bg-white p-6 rounded-lg shadow grid grid-cols-3 md:grid-cols-3 gap-6">
+                <div class="col-span-1">
+                    <label class="block font-bold text-gray-700 mb-2">Data do Evento</label>
+                    <input class="w-full border rounded p-2" type="date" name="data_evento" v-model="form.data_evento"/>
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-bold text-gray-700 mb-2">Local do Evento</label>
+                    <input class="w-full border rounded p-2" type="text" name="local_evento" v-model="form.local_evento" placeholder="Local do evento" />
+                </div>
+            </div>
             <div class="bg-white p-6 rounded-lg shadow grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <div class="md:col-span-2">
