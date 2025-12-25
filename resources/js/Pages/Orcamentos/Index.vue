@@ -3,6 +3,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
+import { EyeIcon } from "@heroicons/vue/24/solid";
 
 const props = defineProps({ orcamentos: Object, filters: Object });
 const search = ref(props.filters.search || '');
@@ -68,6 +69,9 @@ const statusClasses = (status) => {
                         {{ orc.local_evento ? orc.local_evento : '-'}}
                     </td>
                     <td class="p-4 text-center space-x-2">
+                        <Link :href="`/orcamentos/${orc.id}`" class="text-blue-600 hover:underline">
+                            Ver
+                        </Link>
                         <Link :href="`/orcamentos/${orc.id}/editar`" class="text-blue-600 hover:underline">Editar</Link>
                         <Link :href="`/proposta/${orc.hash}`" class="text-blue-600 hover:underline">Compartilhar</Link>
                     </td>

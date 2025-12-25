@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('orcamentos')->name('orcamentos.')->group(function () {
         Route::get('/', [OrcamentoController::class, 'index'])->name('index');
         Route::get('/novo', [OrcamentoController::class, 'create'])->name('create');
+        Route::get('/{id}', [OrcamentoController::class, 'show'])->name('show');
         Route::post('/', [OrcamentoController::class, 'store'])->name('store');
         Route::get('/{id}/editar', [OrcamentoController::class, 'edit'])->name('edit');
         Route::put('/{id}', [OrcamentoController::class, 'update'])->name('update');

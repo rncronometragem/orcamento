@@ -6,6 +6,7 @@ use App\Models\Orcamento;
 use App\Models\OrcamentoItem;
 use App\Models\Cliente;
 use App\Models\Produto;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -90,6 +91,11 @@ class OrcamentoController extends Controller
     {
         $orcamento = Orcamento::with('itens')->findOrFail($id);
 
+        if ($orcamento->data_evento)
+        {
+            $orcamento->data_evento = Carbon::create($orcamento->data_evento)->format('Y-m-d');
+        }
+
         return Inertia::render('Orcamentos/Form', [
             'orcamento' => $orcamento,
             'clientes' => Cliente::select('id', 'nome')->orderBy('nome')->get(),
@@ -130,11 +136,22 @@ class OrcamentoController extends Controller
                 'cliente_id' => $dados['cliente_id'],
                 'status' => $dados['status'],
                 'observacoes' => $dados['observacoes'],
-                'valor_total' => $totalGeral
+                'valor_total' => $totalGeral,
+                'pode_ver_unitarios' => $dados['pode_ver_unitarios'],
+                'data_evento' => $dados['data_evento'],
+                'local_evento' => $dados['local_evento'],
             ]);
         });
 
         return redirect()->route('orcamentos.index')->with('message', 'Orçamento atualizado!');
+    }
+
+    public function show($id)
+    {
+        $orcamento = Orcamento::with(['itens', 'cliente'])->findOrFail($id);
+        return Inertia::render('Orcamentos/Show', [
+            'orcamento' => $orcamento,
+        ]);
     }
 
     public function destroy($id)
