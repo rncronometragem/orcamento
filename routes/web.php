@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/novo', [OrcamentoController::class, 'create'])->name('create');
         Route::get('/{id}', [OrcamentoController::class, 'show'])->name('show');
         Route::post('/', [OrcamentoController::class, 'store'])->name('store');
+        Route::get('/consulta-dia/{dia}', [OrcamentoController::class, 'consultarOrcamentosDia'])->name('consultaDia');
         Route::get('/{id}/editar', [OrcamentoController::class, 'edit'])->name('edit');
         Route::put('/{id}', [OrcamentoController::class, 'update'])->name('update');
         Route::delete('/{id}', [OrcamentoController::class, 'destroy'])->name('destroy');

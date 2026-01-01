@@ -1,80 +1,159 @@
 <template>
-    <div class="flex h-screen bg-gray-100">
-
-        <aside class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex">
-
-            <div class="h-16 flex items-center justify-center border-b border-slate-700 font-bold text-xl tracking-wider">
-                ORÇAMENTO<span class="text-blue-400">SYS</span>
+    <v-app>
+        <v-navigation-drawer
+            v-model="drawer"
+            color="blue-grey-darken-4"
+            theme="dark"
+            width="280"
+        >
+            <div class="d-flex align-center justify-center pa-4 border-b-sm border-opacity-25">
+        <span class="text-h6 font-weight-bold">
+          ORÇAMENTO<span class="text-blue-lighten-2">SYS</span>
+        </span>
             </div>
 
-            <nav class="flex-1 px-4 py-6 space-y-2">
+            <v-list class="pa-4">
 
-                <Link href="/dashboard" :class="{'bg-slate-700 text-white': $page.url === '/dashboard'}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">📊</span>
-                    Dashboard
+                <Link href="/dashboard" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url === '/dashboard'"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">📊</span>
+                        </template>
+                        <v-list-item-title>Dashboard</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-                <Link href="/orcamentos" :class="{'bg-slate-700 text-white': $page.url.startsWith('/orcamentos')}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">📝</span>
-                    Orçamentos
+                <Link href="/orcamentos" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url.startsWith('/orcamentos')"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">📝</span>
+                        </template>
+                        <v-list-item-title>Orçamentos</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-                <Link href="/clientes" :class="{'bg-slate-700 text-white': $page.url.startsWith('/clientes')}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">👥</span>
-                    Clientes
+                <Link href="/clientes" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url.startsWith('/clientes')"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">👥</span>
+                        </template>
+                        <v-list-item-title>Clientes</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-                <Link href="/produtos" :class="{'bg-slate-700 text-white': $page.url.startsWith('/produtos')}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">📦</span>
-                    Produtos
+                <Link href="/produtos" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url.startsWith('/produtos')"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">📦</span>
+                        </template>
+                        <v-list-item-title>Produtos</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-                <div class="border-t border-slate-700 my-4"></div>
+                <v-divider class="my-4 border-opacity-25"></v-divider>
 
-                <Link href="/empresa" :class="{'bg-slate-700 text-white': $page.url.startsWith('/empresa')}" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">🏢</span>
-                    Minha Empresa
+                <Link href="/empresa" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url.startsWith('/empresa')"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">🏢</span>
+                        </template>
+                        <v-list-item-title>Minha Empresa</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-                <Link href="/configuracoes" class="flex items-center px-4 py-3 rounded hover:bg-slate-700 transition text-slate-300 hover:text-white">
-                    <span class="mr-3 text-lg">⚙️</span>
-                    Configurações
+                <Link href="/configuracoes" class="text-decoration-none text-white">
+                    <v-list-item
+                        rounded="lg"
+                        class="mb-1"
+                        :active="$page.url.startsWith('/configuracoes')"
+                        color="primary"
+                    >
+                        <template v-slot:prepend>
+                            <span class="mr-3 text-h6">⚙️</span>
+                        </template>
+                        <v-list-item-title>Configurações</v-list-item-title>
+                    </v-list-item>
                 </Link>
 
-            </nav>
+            </v-list>
 
-            <div class="p-4 border-t border-slate-700">
-                <Link href="/logout" method="post" as="button" class="flex items-center w-full px-4 py-2 text-red-400 hover:bg-slate-700 rounded transition">
-                    <span class="mr-3">🚪</span>
-                    Sair do Sistema
-                </Link>
-            </div>
-
-        </aside>
-
-        <div class="flex-1 flex flex-col overflow-hidden">
-
-            <header class="h-16 bg-white shadow flex items-center justify-between px-6">
-                <button class="md:hidden text-gray-600 text-2xl">☰</button> <div class="font-bold text-gray-700">
-                <slot name="header" />
-            </div>
-
-                <div class="flex items-center">
-                    <span class="text-sm text-gray-600 mr-2">Olá, {{ $page.props.auth.user.name }}</span>
-                    <div class="h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">A</div>
+            <template v-slot:append>
+                <div class="pa-4 border-t-sm border-opacity-25">
+                    <Link href="/logout" method="post" as="div" class="text-decoration-none cursor-pointer">
+                        <v-list-item rounded="lg" color="red-lighten-2">
+                            <template v-slot:prepend>
+                                <span class="mr-3 text-h6">🚪</span>
+                            </template>
+                            <v-list-item-title class="text-red-lighten-2">Sair do Sistema</v-list-item-title>
+                        </v-list-item>
+                    </Link>
                 </div>
-            </header>
+            </template>
+        </v-navigation-drawer>
 
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <v-app-bar elevation="1" color="white">
+            <v-app-bar-nav-icon @click="drawer = !drawer" class="d-md-none"></v-app-bar-nav-icon>
+
+            <v-toolbar-title class="font-weight-bold text-grey-darken-3">
+                <slot name="header" />
+            </v-toolbar-title>
+
+            <template v-slot:append>
+        <span class="text-caption text-grey-darken-1 mr-3 d-none d-sm-flex">
+          Olá, {{ $page.props.auth.user.name }}
+        </span>
+                <v-avatar color="blue" size="32">
+                    <span class="text-white font-weight-bold">A</span>
+                </v-avatar>
+            </template>
+        </v-app-bar>
+
+        <v-main class="bg-grey-lighten-4">
+            <v-container fluid class="pa-6">
                 <slot />
-            </main>
-
-        </div>
-
-    </div>
+            </v-container>
+        </v-main>
+    </v-app>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useDisplay } from 'vuetify';
 
+// Controla a abertura/fechamento do menu lateral
+// O Vuetify gerencia isso automaticamente, mas precisamos da ref para o botão de toggle
+const drawer = ref(null);
 </script>
+
+<style scoped>
+/* Ajuste fino para garantir que o Link do Inertia não quebre o layout flex do Vuetify */
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>

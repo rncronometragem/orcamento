@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({
     user: Object
@@ -13,10 +14,15 @@ const form = useForm({
     password_confirmation: ''
 });
 
+// Controle de visibilidade das senhas
+const showPass = ref(false);
+
 const submit = () => {
     form.post('/configuracoes', {
         preserveScroll: true,
-        onSuccess: () => form.reset('password', 'password_confirmation') // Limpa a senha após salvar
+        onSuccess: () => {
+            form.reset('password', 'password_confirmation');
+        }
     });
 };
 </script>
@@ -25,68 +31,113 @@ const submit = () => {
     <AppLayout>
         <template #header>Meu Perfil</template>
 
-        <div class="max-w-4xl mx-auto py-6">
+        <v-card class="mx-auto" max-width="900" elevation="2" rounded="lg">
 
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3">
-                    <div class="bg-blue-100 text-blue-600 p-2 rounded-full">
-                        👤
+            <v-card-item class="pa-6 bg-grey-lighten-5 border-b">
+                <template v-slot:prepend>
+                    <v-avatar color="blue-lighten-5" size="48" class="mr-4">
+                        <span class="text-h5">👤</span>
+                    </v-avatar>
+                </template>
+                <v-card-title class="font-weight-bold text-grey-darken-3">
+                    Dados de Acesso
+                </v-card-title>
+                <v-card-subtitle>
+                    Gerencie suas informações pessoais e segurança.
+                </v-card-subtitle>
+            </v-card-item>
+
+            <v-form @submit.prevent="submit">
+                <v-card-text class="pa-6">
+
+                    <v-row>
+                        <v-col cols="12" md="6">
+                            <div class="text-subtitle-2 font-weight-bold mb-2 text-grey-darken-2">Nome Completo</div>
+                            <v-text-field
+                                v-model="form.name"
+                                placeholder="Seu nome"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-account-outline"
+                                :error-messages="form.errors.name"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" md="6">
+                            <div class="text-subtitle-2 font-weight-bold mb-2 text-grey-darken-2">E-mail de Login</div>
+                            <v-text-field
+                                v-model="form.email"
+                                type="email"
+                                placeholder="seu@email.com"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-email-outline"
+                                :error-messages="form.errors.email"
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+
+                    <v-divider class="my-6"></v-divider>
+
+                    <h4 class="text-h6 font-weight-bold text-grey-darken-2 mb-4">
+                        Alterar Senha <span class="text-caption text-grey font-weight-regular">(Opcional)</span>
+                    </h4>
+
+                    <v-row>
+                        <v-col cols="12" md="6">
+                            <div class="text-subtitle-2 font-weight-bold mb-2 text-grey-darken-2">Nova Senha</div>
+                            <v-text-field
+                                v-model="form.password"
+                                :type="showPass ? 'text' : 'password'"
+                                placeholder="Deixe em branco para manter a atual"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-lock-outline"
+                                :append-inner-icon="showPass ? 'mdi-eye-off' : 'mdi-eye'"
+                                @click:append-inner="showPass = !showPass"
+                                :error-messages="form.errors.password"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" md="6">
+                            <div class="text-subtitle-2 font-weight-bold mb-2 text-grey-darken-2">Confirmar Nova Senha</div>
+                            <v-text-field
+                                v-model="form.password_confirmation"
+                                :type="showPass ? 'text' : 'password'"
+                                placeholder="Repita a nova senha"
+                                variant="outlined"
+                                density="comfortable"
+                                prepend-inner-icon="mdi-lock-check-outline"
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+
+                </v-card-text>
+
+                <v-card-actions class="pa-6 pt-0 d-flex align-center justify-space-between">
+
+                    <div style="min-height: 24px;">
+                        <v-slide-y-transition>
+                            <div v-if="form.recentlySuccessful" class="text-success font-weight-bold d-flex align-center">
+                                <v-icon icon="mdi-check-circle" start class="mr-1"></v-icon>
+                                Salvo com sucesso!
+                            </div>
+                        </v-slide-y-transition>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800">Dados de Acesso</h3>
-                        <p class="text-sm text-gray-500">Gerencie suas informações pessoais e segurança.</p>
-                    </div>
-                </div>
 
-                <form @submit.prevent="submit" class="p-6">
+                    <v-btn
+                        type="submit"
+                        color="blue-darken-1"
+                        variant="elevated"
+                        size="large"
+                        :loading="form.processing"
+                        class="font-weight-bold text-white px-6"
+                    >
+                        Atualizar Perfil
+                    </v-btn>
+                </v-card-actions>
+            </v-form>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label class="block font-bold text-sm text-gray-700 mb-2">Nome Completo</label>
-                            <input v-model="form.name" type="text" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500" required>
-                            <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-sm text-gray-700 mb-2">E-mail de Login</label>
-                            <input v-model="form.email" type="email" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500" required>
-                            <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-gray-100 my-6"></div>
-
-                    <h4 class="font-bold text-gray-700 mb-4">Alterar Senha (Opcional)</h4>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label class="block font-bold text-sm text-gray-700 mb-2">Nova Senha</label>
-                            <input v-model="form.password" type="password" placeholder="Deixe em branco para manter a atual" class="w-full border border-gray-300 rounded-lg p-2.5">
-                            <div v-if="form.errors.password" class="text-red-500 text-xs mt-1">{{ form.errors.password }}</div>
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-sm text-gray-700 mb-2">Confirmar Nova Senha</label>
-                            <input v-model="form.password_confirmation" type="password" placeholder="Repita a nova senha" class="w-full border border-gray-300 rounded-lg p-2.5">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between mt-4">
-
-                        <div class="text-sm">
-                        <span v-if="form.recentlySuccessful" class="text-green-600 font-bold flex items-center gap-1">
-                            ✅ Salvo com sucesso!
-                        </span>
-                        </div>
-
-                        <button type="submit" :disabled="form.processing" class="bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-700 transition shadow-md disabled:opacity-50">
-                            {{ form.processing ? 'Salvando...' : 'Atualizar Perfil' }}
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-
-        </div>
+        </v-card>
     </AppLayout>
 </template>

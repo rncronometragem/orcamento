@@ -2,21 +2,20 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
-import { Ziggy } from '@/ziggy';
 
 const props = defineProps({
     orcamento: Object,
     empresa: Object
 });
 
-// Form para as ações de Aprovar/Rejeitar
 const form = useForm({
     status: '',
     observacao: ''
 });
 
 const enviarResposta = (status) => {
-    if (!confirm(`Tem certeza que deseja ${status === 'aprovado' ? 'APROVAR' : 'REJEITAR'} este orçamento?`)) return;
+    const action = status === 'aprovado' ? 'APROVAR' : 'REJEITAR';
+    if (!confirm(`Tem certeza que deseja ${action} este orçamento?`)) return;
 
     form.status = status;
     form.post(route('orcamentos.responder', props.orcamento.hash));
@@ -27,140 +26,203 @@ const formatMoney = (value) => {
 };
 
 const formatDate = (date) => {
+    if (!date) return '-';
     return new Date(date).toLocaleDateString('pt-BR');
 };
 
 const totalGeral = computed(() => {
     return props.orcamento.itens.reduce((acc, item) => acc + (item.quantidade * item.preco_unitario), 0);
 });
+
+const getStatusColor = (status) => {
+    const map = {
+        'pendente': 'warning',
+        'aprovado': 'success',
+        'rejeitado': 'error'
+    };
+    return map[status] || 'grey';
+};
 </script>
 
 <template>
     <Head title="Orçamento Detalhado" />
 
-    <div class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6">
-        <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
+    <v-app class="bg-grey-lighten-4">
+        <v-main>
+            <v-container class="py-10">
 
-            <div class="bg-slate-800 text-white p-8 flex justify-between items-start">
-                <div>
-                    <h1 class="text-3xl font-bold">ORÇAMENTO</h1>
-                    <p class="text-slate-400 mt-1">#{{ orcamento.id.toString().padStart(6, '0') }}</p>
-                    <div class="mt-4">
-                        <span
-                            class="px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider"
-                            :class="{
-                                'bg-yellow-500 text-yellow-900': orcamento.status === 'pendente',
-                                'bg-green-500 text-green-900': orcamento.status === 'aprovado',
-                                'bg-red-500 text-red-900': orcamento.status === 'rejeitado',
-                            }"
-                        >
-                            {{ orcamento.status }}
-                        </span>
+                <v-card class="mx-auto" max-width="900" elevation="4" rounded="lg">
+
+                    <v-sheet color="blue-grey-darken-4" class="pa-8">
+                        <v-row align="start">
+                            <v-col cols="12" md="8">
+                                <h1 class="text-h4 font-weight-bold text-white mb-1">ORÇAMENTO</h1>
+                                <p class="text-subtitle-1 text-grey-lighten-1 mb-4">
+                                    #{{ orcamento.id.toString().padStart(6, '0') }}
+                                </p>
+
+                                <v-chip
+                                    :color="getStatusColor(orcamento.status)"
+                                    variant="elevated"
+                                    class="font-weight-bold text-uppercase"
+                                    label
+                                >
+                                    {{ orcamento.status }}
+                                </v-chip>
+                            </v-col>
+
+                            <v-col cols="12" md="4" class="text-md-right" v-if="empresa">
+                                <div class="d-flex flex-column align-md-end">
+                                    <v-avatar
+                                        rounded="lg"
+                                        color="blue-grey-lighten-4"
+                                        size="80"
+                                        class="mb-3"
+                                    >
+                                        <v-img v-if="empresa.logo" :src="'/storage/' + empresa.logo" cover></v-img>
+                                        <v-icon v-else icon="mdi-domain" size="large" color="grey-darken-2"></v-icon>
+                                    </v-avatar>
+
+                                    <h2 class="text-h6 font-weight-bold text-white">{{ empresa.nome }}</h2>
+                                    <div class="text-body-2 text-grey-lighten-2">{{ empresa.email }}</div>
+                                    <div class="text-body-2 text-grey-lighten-2">{{ empresa.telefone }}</div>
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </v-sheet>
+
+                    <div class="pa-8">
+                        <v-row>
+                            <v-col cols="12" md="6">
+                                <div class="text-caption font-weight-bold text-grey-darken-1 text-uppercase mb-1">Cliente</div>
+                                <div class="text-h6 font-weight-bold text-grey-darken-3 mb-1">
+                                    {{ orcamento.cliente.nome }}
+                                </div>
+                                <div class="text-body-2 text-grey-darken-1">{{ orcamento.cliente.email }}</div>
+                                <div class="text-body-2 text-grey-darken-1" v-if="orcamento.cliente.documento">
+                                    CPF/CNPJ: {{ orcamento.cliente.documento }}
+                                </div>
+                            </v-col>
+
+                            <v-col cols="12" md="6" class="text-md-right">
+                                <div class="mb-3">
+                                    <span class="text-caption font-weight-bold text-grey-darken-1 text-uppercase mr-2">Data de Emissão:</span>
+                                    <span class="text-body-1 font-weight-medium">{{ formatDate(orcamento.created_at) }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-caption font-weight-bold text-grey-darken-1 text-uppercase mr-2">Validade:</span>
+                                    <span
+                                        class="text-body-1 font-weight-medium"
+                                        :class="orcamento.data_expiracao ? 'text-red-darken-1' : ''"
+                                    >
+                                        {{ orcamento.data_expiracao ? formatDate(orcamento.data_expiracao) : 'Sem prazo' }}
+                                    </span>
+                                </div>
+                            </v-col>
+                        </v-row>
                     </div>
+
+                    <v-divider></v-divider>
+
+                    <div class="pa-8" v-if="orcamento.pode_ver_unitarios">
+                        <div class="text-caption font-weight-bold text-grey-darken-1 text-uppercase mb-4">Itens / Serviços</div>
+
+                        <v-table density="comfortable">
+                            <thead>
+                            <tr>
+                                <th class="text-left font-weight-bold text-grey-darken-2">Descrição</th>
+                                <th class="text-center font-weight-bold text-grey-darken-2">Qtd.</th>
+                                <th class="text-right font-weight-bold text-grey-darken-2">Preço Unit.</th>
+                                <th class="text-right font-weight-bold text-grey-darken-2">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in orcamento.itens" :key="item.id">
+                                <td class="py-4">
+                                    <div class="font-weight-medium text-grey-darken-3">{{ item.nome }}</div>
+                                    <div class="text-caption text-grey-darken-1">{{ item.descricao }}</div>
+                                </td>
+                                <td class="text-center">{{ item.quantidade }}</td>
+                                <td class="text-right">{{ formatMoney(item.preco_unitario) }}</td>
+                                <td class="text-right font-weight-medium">{{ formatMoney(item.subtotal) }}</td>
+                            </tr>
+                            </tbody>
+                        </v-table>
+                    </div>
+
+                    <div class="bg-grey-lighten-5 pa-8">
+                        <v-row justify="end">
+                            <v-col cols="12" md="6" lg="5">
+                                <div class="d-flex justify-space-between mb-2 text-grey-darken-2">
+                                    <span>Subtotal</span>
+                                    <span>{{ formatMoney(totalGeral) }}</span>
+                                </div>
+
+                                <div class="d-flex justify-space-between mb-4 text-green-darken-2" v-if="orcamento.desconto > 0">
+                                    <span>Desconto</span>
+                                    <span>- {{ formatMoney(orcamento.desconto) }}</span>
+                                </div>
+
+                                <v-divider class="mb-4"></v-divider>
+
+                                <div class="d-flex justify-space-between align-center">
+                                    <span class="text-h6 font-weight-regular text-grey-darken-3">Total</span>
+                                    <span class="text-h4 font-weight-bold text-blue-grey-darken-4">
+                                        {{ formatMoney(totalGeral - (orcamento.desconto || 0)) }}
+                                    </span>
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </div>
+
+                    <div v-if="orcamento.status === 'pendente'" class="pa-8 border-t">
+                        <v-row justify="end" dense>
+                            <v-col cols="12" sm="auto">
+                                <v-btn
+                                    color="red"
+                                    variant="outlined"
+                                    size="large"
+                                    block
+                                    :loading="form.processing"
+                                    @click="enviarResposta('rejeitado')"
+                                >
+                                    Recusar Proposta
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="12" sm="auto">
+                                <v-btn
+                                    color="green-darken-1"
+                                    variant="elevated"
+                                    size="large"
+                                    block
+                                    prepend-icon="mdi-check"
+                                    class="font-weight-bold text-white"
+                                    :loading="form.processing"
+                                    @click="enviarResposta('aprovado')"
+                                >
+                                    Aprovar Orçamento
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+                    </div>
+
+                    <div v-if="orcamento.status === 'aprovado'" class="pa-8 bg-green-lighten-5 text-center border-t">
+                        <v-icon icon="mdi-check-circle" color="green" size="48" class="mb-2"></v-icon>
+                        <div class="text-h6 text-green-darken-3 font-weight-medium">
+                            Este orçamento foi aprovado em {{ formatDate(orcamento.data_resposta) }}.
+                        </div>
+                        <div class="text-body-2 text-green-darken-2 mt-1">
+                            Entraremos em contato em breve para iniciar o serviço.
+                        </div>
+                    </div>
+
+                </v-card>
+
+                <div class="text-center mt-8 text-caption text-grey">
+                    &copy; {{ new Date().getFullYear() }} {{ empresa ? empresa.nome : "OrçamentoSYS" }}. Todos os direitos reservados.
                 </div>
-                <div class="text-right" v-if="empresa">
-                    <div class="h-16 w-16 bg-slate-600 rounded mb-2 ml-auto flex items-center justify-center">
-                        <img :src="'/storage/' + empresa.logo ">
-                    </div>
-                    <h2 class="font-semibold text-lg">{{ empresa.nome }}</h2>
-                    <p class="text-sm text-slate-300">{{ empresa.email }}</p>
-                    <p class="text-sm text-slate-300">{{ empresa.telefone }}</p>
-                </div>
-            </div>
 
-            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 border-b">
-                <div>
-                    <h3 class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-2">Cliente</h3>
-                    <p class="text-lg font-bold text-gray-800">{{ orcamento.cliente.nome }}</p>
-                    <p class="text-gray-600">{{ orcamento.cliente.email }}</p>
-                    <p class="text-gray-600" v-if="orcamento.cliente.documento">CPF/CNPJ: {{ orcamento.cliente.documento }}</p>
-                </div>
-                <div class="md:text-right">
-                    <div class="mb-2">
-                        <span class="text-gray-500 uppercase text-xs font-bold tracking-wider">Data de Emissão:</span>
-                        <span class="ml-2 font-medium">{{ formatDate(orcamento.created_at) }}</span>
-                    </div>
-                    <div >
-                        <span class="text-gray-500 uppercase text-xs font-bold tracking-wider">Validade:</span>
-                        <span v-if="orcamento.data_expiracao" class="ml-2 font-medium text-red-600">{{ formatDate(orcamento.data_expiracao) }}</span>
-                        <span v-else> Sem prazo</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-8" v-if="orcamento.pode_ver_unitarios">
-                <h3 class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-4">Itens / Serviços</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                        <tr class="border-b-2 border-slate-200">
-                            <th class="py-3 text-sm text-gray-600">Descrição</th>
-                            <th class="py-3 text-sm text-gray-600 text-center">Qtd.</th>
-                            <th class="py-3 text-sm text-gray-600 text-right">Preço Unit.</th>
-                            <th class="py-3 text-sm text-gray-600 text-right">Total</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="item in orcamento.itens" :key="item.id" class="border-b border-gray-100 last:border-0">
-                            <td class="py-4 pr-4">
-                                <p class="font-medium text-gray-800">{{ item.nome }}</p>
-                                <p class="text-sm text-gray-500">{{ item.descricao }}</p>
-                            </td>
-                            <td class="py-4 text-center">{{ item.quantidade }}</td>
-                            <td class="py-4 text-right">{{ formatMoney(item.preco_unitario) }}</td>
-                            <td class="py-4 text-right font-medium">{{ formatMoney(item.subtotal) }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="bg-gray-50 p-8 flex flex-col md:flex-row justify-end items-end gap-2 border-t">
-                <div class="w-full md:w-1/2 space-y-3">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Subtotal</span>
-                        <span>{{ formatMoney(totalGeral) }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600" v-if="orcamento.desconto > 0">
-                        <span>Desconto</span>
-                        <span class="text-green-600">- {{ formatMoney(orcamento.desconto) }}</span>
-                    </div>
-                    <div class="flex justify-between text-2xl font-bold text-slate-800 pt-4 border-t border-gray-300">
-                        <span>Total</span>
-                        <span>{{ formatMoney(totalGeral - (orcamento.desconto || 0)) }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="orcamento.status === 'pendente'" class="p-8 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row gap-4 justify-end">
-                <button
-                    @click="enviarResposta('rejeitado')"
-                    :disabled="form.processing"
-                    class="px-6 py-3 bg-white border border-red-300 text-red-600 font-semibold rounded hover:bg-red-50 transition shadow-sm w-full sm:w-auto"
-                >
-                    Recusar Proposta
-                </button>
-                <button
-                    @click="enviarResposta('aprovado')"
-                    :disabled="form.processing"
-                    class="px-6 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition shadow-lg w-full sm:w-auto flex items-center justify-center gap-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    Aprovar Orçamento
-                </button>
-            </div>
-
-            <div v-if="orcamento.status === 'aprovado'" class="p-8 bg-green-50 text-center border-t border-green-100">
-                <p class="text-green-800 font-medium text-lg">Este orçamento foi aprovado em {{ formatDate(orcamento.data_resposta) }}.</p>
-                <p class="text-green-600 text-sm mt-1">Entraremos em contato em breve para iniciar o serviço.</p>
-            </div>
-
-        </div>
-
-        <div class="max-w-4xl mx-auto text-center mt-8 text-gray-400 text-sm">
-            &copy; {{ new Date().getFullYear() }} {{ (empresa) ? empresa.nome : "OrçamentoSYS" }}. Todos os direitos reservados.
-        </div>
-    </div>
+            </v-container>
+        </v-main>
+    </v-app>
 </template>

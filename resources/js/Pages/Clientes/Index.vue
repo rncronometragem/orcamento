@@ -1,28 +1,33 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
-import debounce from 'lodash/debounce'; // Vamos usar para não buscar a cada letra digitada
+import debounce from 'lodash/debounce';
 
-// Recebendo os dados do Controller
 const props = defineProps({
     clientes: Object,
     filters: Object
 });
 
-// Controle do campo de busca
 const search = ref(props.filters.search || '');
+// Ref para controlar a página atual na paginação do Vuetify
+const page = ref(props.clientes.current_page);
 
-// Observa o campo de busca e dispara a requisição ao Controller
-// O debounce espera o usuário parar de digitar por 300ms antes de buscar
 watch(search, debounce((value) => {
-    router.get('/clientes', { search: value }, {
-        preserveState: true, // Mantém a posição do scroll
-        replace: true        // Não suja o histórico do navegador
+    // Ao buscar, voltamos para a página 1
+    router.get('/clientes', { search: value, page: 1 }, {
+        preserveState: true,
+        replace: true
     });
 }, 300));
 
-// Função auxiliar para deletar (opcional por enquanto)
+const onPageChange = (newPage) => {
+    router.get('/clientes', { search: search.value, page: newPage }, {
+        preserveState: true,
+        replace: true
+    });
+};
+
 function deletar(id) {
     if(confirm('Tem certeza que deseja excluir este cliente?')) {
         router.delete(`/clientes/${id}`);
@@ -36,101 +41,138 @@ function deletar(id) {
             Gerenciar Clientes
         </template>
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <v-card elevation="2" rounded="lg">
 
-            <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-
-                <div class="relative w-full md:w-1/3">
-                    <input
+            <v-card-text class="d-flex flex-column flex-md-row justify-space-between align-center gap-4 pa-4">
+                <div style="width: 100%; max-width: 400px;">
+                    <v-text-field
                         v-model="search"
-                        type="text"
-                        placeholder="Buscar por nome ou CPF/CNPJ..."
-                        class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                    >
-                    <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                        label="Buscar por nome ou CPF/CNPJ..."
+                        prepend-inner-icon="mdi-magnify"
+                        variant="outlined"
+                        density="compact"
+                        hide-details
+                        bg-color="white"
+                    ></v-text-field>
                 </div>
 
-                <Link href="/clientes/novo" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center">
-                    <span class="mr-2">+</span> Novo Cliente
+                <Link href="/clientes/novo" class="text-decoration-none">
+                    <v-btn color="blue" prepend-icon="mdi-plus" class="text-white font-weight-bold">
+                        Novo Cliente
+                    </v-btn>
                 </Link>
-            </div>
+            </v-card-text>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                    <tr class="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
-                        <th class="p-4 border-b">Nome / Razão Social</th>
-                        <th class="p-4 border-b">Documento</th>
-                        <th class="p-4 border-b">Localização</th>
-                        <th class="p-4 border-b">Contato Principal</th>
-                        <th class="p-4 border-b text-center">Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
+            <v-divider></v-divider>
 
-                    <tr v-if="clientes.data.length === 0">
-                        <td colspan="5" class="p-8 text-center text-gray-500">
-                            Nenhum cliente encontrado.
-                        </td>
-                    </tr>
-
-                    <tr v-for="cliente in clientes.data" :key="cliente.id" class="hover:bg-gray-50 transition">
-
-                        <td class="p-4 font-medium text-gray-900">
+            <v-table hover>
+                <thead>
+                <tr class="bg-grey-lighten-4 text-uppercase text-caption text-grey-darken-1">
+                    <th class="font-weight-bold py-3">Nome / Razão Social</th>
+                    <th class="font-weight-bold py-3">Documento</th>
+                    <th class="font-weight-bold py-3">Localização</th>
+                    <th class="font-weight-bold py-3">Contato Principal</th>
+                    <th class="font-weight-bold py-3 text-center">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="cliente in clientes.data" :key="cliente.id">
+                    <td class="py-4">
+                        <div class="font-weight-bold text-grey-darken-3">
                             {{ cliente.nome }}
-                            <div class="text-xs text-gray-400 mt-1">{{ cliente.tipo_pessoa === 'juridica' ? 'Empresa' : 'Pessoa Física' }}</div>
-                        </td>
+                        </div>
+                        <div class="mt-1">
+                            <v-chip
+                                size="x-small"
+                                :color="cliente.tipo_pessoa === 'juridica' ? 'indigo' : 'teal'"
+                                variant="tonal"
+                                label
+                            >
+                                {{ cliente.tipo_pessoa === 'juridica' ? 'Empresa' : 'Pessoa Física' }}
+                            </v-chip>
+                        </div>
+                    </td>
 
-                        <td class="p-4">
-                            {{ cliente.documento || '-' }}
-                        </td>
+                    <td class="text-body-2 text-grey-darken-2 py-4">
+                        {{ cliente.documento || '-' }}
+                    </td>
 
-                        <td class="p-4">
-                            <div v-if="cliente.enderecos && cliente.enderecos.length > 0">
-                                {{ cliente.enderecos[0].cidade }} / {{ cliente.enderecos[0].uf }}
+                    <td class="py-4">
+                        <div v-if="cliente.enderecos && cliente.enderecos.length > 0" class="text-body-2">
+                            {{ cliente.enderecos[0].cidade }} / {{ cliente.enderecos[0].uf }}
+                        </div>
+                        <span v-else class="text-caption text-grey font-italic">
+                                Sem endereço
+                            </span>
+                    </td>
+
+                    <td class="py-4">
+                        <div v-if="cliente.contatos && cliente.contatos.length > 0">
+                            <div class="font-weight-medium text-body-2">
+                                {{ cliente.contatos[0].celular }}
                             </div>
-                            <span v-else class="text-gray-400 italic">Sem endereço</span>
-                        </td>
-
-                        <td class="p-4">
-                            <div v-if="cliente.contatos && cliente.contatos.length > 0">
-                                <div class="font-medium">{{ cliente.contatos[0].celular }}</div>
-                                <div class="text-xs text-gray-500">{{ cliente.contatos[0].email }}</div>
+                            <div class="text-caption text-grey">
+                                {{ cliente.contatos[0].email }}
                             </div>
-                            <span v-else class="text-gray-400 italic">Sem contato</span>
-                        </td>
+                        </div>
+                        <span v-else class="text-caption text-grey font-italic">
+                                Sem contato
+                            </span>
+                    </td>
 
-                        <td class="p-4 flex justify-center gap-2">
-                            <Link :href="`/clientes/${cliente.id}/editar`" class="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded">
-                                ✏️
+                    <td class="text-center py-4">
+                        <div class="d-flex justify-center gap-2">
+                            <Link :href="`/clientes/${cliente.id}/editar`" class="text-decoration-none">
+                                <v-btn
+                                    icon="mdi-pencil"
+                                    color="blue-lighten-4"
+                                    variant="flat"
+                                    size="x-small"
+                                    class="text-blue-darken-4"
+                                    elevation="0"
+                                ></v-btn>
                             </Link>
-                            <button @click="deletar(cliente.id)" class="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded">
-                                🗑️
-                            </button>
-                        </td>
 
-                    </tr>
-                    </tbody>
-                </table>
+                            <v-btn
+                                icon="mdi-delete"
+                                color="red-lighten-4"
+                                variant="flat"
+                                size="x-small"
+                                class="text-red-darken-4"
+                                elevation="0"
+                                @click="deletar(cliente.id)"
+                            ></v-btn>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-if="clientes.data.length === 0">
+                    <td colspan="5" class="text-center pa-8 text-grey">
+                        <v-icon icon="mdi-account-off" size="large" class="mb-2"></v-icon>
+                        <div>Nenhum cliente encontrado.</div>
+                    </td>
+                </tr>
+                </tbody>
+            </v-table>
+
+            <v-divider></v-divider>
+
+            <div v-if="clientes.last_page > 1" class="pa-4 d-flex justify-center">
+                <v-pagination
+                    v-model="page"
+                    :length="clientes.last_page"
+                    :total-visible="5"
+                    color="blue"
+                    density="comfortable"
+                    @update:model-value="onPageChange"
+                ></v-pagination>
             </div>
 
-            <div v-if="clientes.data.length > 0" class="p-4 border-t border-gray-200 flex justify-center">
-                <div class="flex gap-1">
-                    <Link
-                        v-for="(link, key) in clientes.links"
-                        :key="key"
-                        :href="link.url ?? '#'"
-                        v-html="link.label"
-                        class="px-3 py-1 border rounded text-sm"
-                        :class="{
-              'bg-blue-600 text-white border-blue-600': link.active,
-              'text-gray-500 bg-white hover:bg-gray-50': !link.active,
-              'opacity-50 cursor-not-allowed': !link.url
-            }"
-                    />
-                </div>
-            </div>
-
-        </div>
+        </v-card>
     </AppLayout>
 </template>
+
+<style scoped>
+.gap-4 { gap: 16px; }
+.gap-2 { gap: 8px; }
+</style>

@@ -31,7 +31,14 @@ class OrcamentoController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10)
-            ->withQueryString();
+            ->withQueryString()
+            ->groupBy('cliente_id')
+            ->map(function ($items) {
+                return [
+                    'nome_cliente' => $items->first()->cliente->nome,
+                    'items' => $items
+                ];
+            });
 
         return Inertia::render('Orcamentos/Index', [
             'orcamentos' => $orcamentos,
@@ -41,7 +48,7 @@ class OrcamentoController extends Controller
 
     public function create()
     {
-        return Inertia::render('Orcamentos/Form', [
+        return Inertia::render('Orcamentos/Novo', [
             'clientes' => Cliente::select('id', 'nome')->orderBy('nome')->get(),
             'produtos' => Produto::select('id', 'nome', 'valor')->orderBy('nome')->get(), // Para o autocomplete
         ]);
@@ -96,7 +103,7 @@ class OrcamentoController extends Controller
             $orcamento->data_evento = Carbon::create($orcamento->data_evento)->format('Y-m-d');
         }
 
-        return Inertia::render('Orcamentos/Form', [
+        return Inertia::render('Orcamentos/Edit', [
             'orcamento' => $orcamento,
             'clientes' => Cliente::select('id', 'nome')->orderBy('nome')->get(),
             'produtos' => Produto::select('id', 'nome', 'valor')->orderBy('nome')->get(),
@@ -178,5 +185,27 @@ class OrcamentoController extends Controller
         ], [
             'itens.required' => 'Adicione pelo menos um item ao orçamento.',
         ]);
+    }
+
+    public function consultarOrcamentosDia($dia)
+    {
+         $orcamentos = Orcamento::query()
+            ->where("user_id", Auth::id())
+            ->whereDataEvento($dia)
+            ->with('cliente')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString()
+            ->groupBy('cliente_id')
+            ->map(function ($items) {
+                return [
+                    'nome_cliente' => $items->first()->cliente->nome,
+                    'items' => $items
+                ];
+            });
+
+        return [
+            'orcamentos' => $orcamentos,
+        ];
     }
 }

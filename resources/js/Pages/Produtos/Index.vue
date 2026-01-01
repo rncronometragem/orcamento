@@ -5,11 +5,20 @@ import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({ produtos: Object, filters: Object });
-const search = ref(props.filters.search || '');
 
+const search = ref(props.filters.search || '');
+// Criamos uma ref para a página atual baseada no retorno do Laravel
+const page = ref(props.produtos.current_page);
+
+// Watch para a busca (mantido do original)
 watch(search, debounce((val) => {
-    router.get('/produtos', { search: val }, { preserveState: true, replace: true });
+    router.get('/produtos', { search: val, page: 1 }, { preserveState: true, replace: true });
 }, 300));
+
+// Função para mudar de página usando o componente v-pagination
+const onPageChange = (newPage) => {
+    router.get('/produtos', { search: search.value, page: newPage }, { preserveState: true, replace: true });
+};
 
 function deletar(id) {
     if (confirm('Deseja realmente excluir este produto?')) {
@@ -27,54 +36,110 @@ const formatarMoeda = (valor) => {
     <AppLayout>
         <template #header>Gerenciar Produtos</template>
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="p-4 border-b flex flex-col md:flex-row justify-between items-center gap-4">
-                <input v-model="search" type="text" placeholder="Buscar produto..." class="border rounded p-2 w-full md:w-1/3">
-                <Link href="/produtos/novo" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">
-                    + Novo Produto
-                </Link>
-            </div>
+        <v-card elevation="2" rounded="lg">
 
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                    <th class="p-4">Produto</th>
-                    <th class="p-4">Valor</th>
-                    <th class="p-4">Última Alteração</th> <th class="p-4 text-center">Ações</th>
+            <v-card-text class="d-flex flex-column flex-md-row justify-space-between align-center gap-4 pa-4">
+                <div style="width: 100%; max-width: 400px;">
+                    <v-text-field
+                        v-model="search"
+                        label="Buscar produto..."
+                        prepend-inner-icon="mdi-magnify"
+                        variant="outlined"
+                        density="compact"
+                        hide-details
+                        bg-color="white"
+                    ></v-text-field>
+                </div>
+
+                <Link href="/produtos/novo" class="text-decoration-none">
+                    <v-btn color="blue" prepend-icon="mdi-plus" class="text-white font-weight-bold">
+                        Novo Produto
+                    </v-btn>
+                </Link>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-table hover>
+                <thead>
+                <tr class="bg-grey-lighten-4 text-uppercase text-caption text-grey-darken-1">
+                    <th class="font-weight-bold py-3">Produto</th>
+                    <th class="font-weight-bold py-3">Valor</th>
+                    <th class="font-weight-bold py-3">Última Alteração</th>
+                    <th class="font-weight-bold py-3 text-center">Ações</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y">
-                <tr v-for="prod in produtos.data" :key="prod.id" class="hover:bg-gray-50">
-                    <td class="p-4 font-bold text-gray-700">
+                <tbody>
+                <tr v-for="prod in produtos.data" :key="prod.id">
+                    <td class="font-weight-bold text-grey-darken-3 py-4">
                         {{ prod.nome }}
                     </td>
-                    <td class="p-4 text-green-600 font-bold">
+                    <td class="text-green-darken-1 font-weight-bold py-4">
                         {{ formatarMoeda(prod.valor) }}
                     </td>
-                    <td class="p-4 text-xs text-gray-500">
+                    <td class="text-caption text-grey-darken-1 py-4">
                         {{ prod.usuario_log || '-' }}
                     </td>
-                    <td class="p-4 text-center space-x-2">
-                        <Link :href="`/produtos/${prod.id}/editar`" class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded text-sm hover:bg-yellow-200">
-                            Editar
-                        </Link>
-                        <button @click="deletar(prod.id)" class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200">
-                            Excluir
-                        </button>
+                    <td class="text-center py-4">
+                        <div class="d-flex justify-center gap-2">
+                            <Link :href="`/produtos/${prod.id}/editar`" class="text-decoration-none">
+                                <v-btn
+                                    color="amber-lighten-4"
+                                    variant="flat"
+                                    size="small"
+                                    class="text-amber-darken-4 font-weight-bold"
+                                    elevation="0"
+                                >
+                                    Editar
+                                </v-btn>
+                            </Link>
+
+                            <v-btn
+                                color="red-lighten-4"
+                                variant="flat"
+                                size="small"
+                                class="text-red-darken-4 font-weight-bold"
+                                elevation="0"
+                                @click="deletar(prod.id)"
+                            >
+                                Excluir
+                            </v-btn>
+                        </div>
                     </td>
                 </tr>
+
                 <tr v-if="produtos.data.length === 0">
-                    <td colspan="4" class="p-6 text-center text-gray-500">Nenhum produto encontrado.</td>
+                    <td colspan="4" class="text-center pa-8 text-grey">
+                        <v-icon icon="mdi-package-variant" size="large" class="mb-2"></v-icon>
+                        <div>Nenhum produto encontrado.</div>
+                    </td>
                 </tr>
                 </tbody>
-            </table>
+            </v-table>
 
-            <div v-if="produtos.links.length > 3" class="p-4 flex justify-center gap-1">
-                <Link v-for="(link, k) in produtos.links" :key="k" :href="link.url ?? '#'" v-html="link.label"
-                      class="px-3 py-1 border rounded text-sm"
-                      :class="link.active ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'"
-                />
+            <v-divider></v-divider>
+
+            <div v-if="produtos.last_page > 1" class="pa-4 d-flex justify-center">
+                <v-pagination
+                    v-model="page"
+                    :length="produtos.last_page"
+                    :total-visible="5"
+                    color="blue"
+                    density="comfortable"
+                    @update:model-value="onPageChange"
+                ></v-pagination>
             </div>
-        </div>
+
+        </v-card>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Pequeno ajuste para garantir espaçamento entre botões na coluna de ações */
+.gap-2 {
+    gap: 8px;
+}
+.gap-4 {
+    gap: 16px;
+}
+</style>

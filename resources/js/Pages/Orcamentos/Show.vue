@@ -1,7 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
 
 const props = defineProps({
     orcamento: Object,
@@ -14,146 +13,216 @@ const formatarData = (data) => {
     return new Date(data).toLocaleDateString('pt-BR');
 };
 
-const statusClasses = (status) => {
-    const classes = {
-        'pendente': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        'aprovado': 'bg-green-100 text-green-800 border-green-200',
-        'rejeitado': 'bg-red-100 text-red-800 border-red-200',
-        'cancelado': 'bg-gray-100 text-gray-800 border-gray-200',
+// Mapeamento de cores para o Vuetify
+const getStatusColor = (status) => {
+    const map = {
+        'pendente': 'warning',
+        'aprovado': 'success',
+        'rejeitado': 'error',
+        'cancelado': 'grey',
     };
-    return classes[status] || 'bg-gray-100';
+    return map[status] || 'grey';
 };
 </script>
 
 <template>
     <AppLayout title="Detalhes do Orçamento">
         <template #header>
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Orçamento #{{ orcamento.id }}
-                </h2>
-                <div class="flex gap-2">
-                    <Link :href="route('orcamentos.index')" class="px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">
-                        Voltar
-                    </Link>
-                    <a :href="route('orcamentos.publico', orcamento.hash)" target="_blank" class="px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-md font-semibold text-xs text-indigo-700 uppercase tracking-widest shadow-sm hover:bg-indigo-100 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        Link Público
-                    </a>
-                    <Link :href="route('orcamentos.edit', orcamento.id)" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        Editar
-                    </Link>
+            <div class="d-flex flex-column flex-md-row justify-space-between align-center">
+                <div class="v-row py-1">
+                    <div class="v-col-2">
+                        <h2 class="text-h5 font-weight-bold text-grey-darken-3">
+                            Orçamento #{{ orcamento.id }}
+                        </h2>
+                    </div>
+                    <div class="v-col-2 text-center">
+                        <Link :href="route('orcamentos.index')" class="text-decoration-none">
+                            <v-btn
+                                variant="outlined"
+                                color="grey-darken-1"
+                                prepend-icon="mdi-arrow-left"
+                                class="text-none font-weight-bold"
+                            >
+                                Voltar
+                            </v-btn>
+                        </Link>
+                    </div>
+                    <div class="v-col-2">
+                        <v-btn
+                            :href="route('orcamentos.publico', orcamento.hash)"
+                            target="_blank"
+                            color="indigo-lighten-5"
+                            class="text-indigo-darken-2 font-weight-bold text-none"
+                            elevation="0"
+                            prepend-icon="mdi-open-in-new"
+                            border
+                        >
+                            Link Público
+                        </v-btn>
+                    </div>
+                    <div class="v-col-2 text-center">
+                        <Link :href="route('orcamentos.edit', orcamento.id)" class="text-decoration-none">
+                            <v-btn
+                                color="blue-darken-1"
+                                class="text-white font-weight-bold text-none"
+                                prepend-icon="mdi-pencil"
+                                elevation="1"
+                            >
+                                Editar
+                            </v-btn>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+        <v-card elevation="2" rounded="lg">
 
-                    <div class="p-6 md:p-8 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <span :class="statusClasses(orcamento.status)" class="px-3 py-1 rounded-full text-sm font-bold uppercase border">
-                                {{ orcamento.status }}
-                            </span>
-                            <div class="mt-2 text-sm text-gray-500">
-                                Criado em: {{ formatarData(orcamento.created_at) }}
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-500">Valor Total</div>
-                            <div class="text-3xl font-bold text-gray-800">{{ formatarMoeda(orcamento.valor_total) }}</div>
-                        </div>
+            <div class="d-flex flex-column flex-md-row justify-space-between align-start align-md-center pa-6 bg-grey-lighten-5 border-b">
+                <div>
+                    <v-chip
+                        :color="getStatusColor(orcamento.status)"
+                        label
+                        class="font-weight-bold text-uppercase mb-2"
+                        variant="tonal"
+                    >
+                        {{ orcamento.status }}
+                    </v-chip>
+                    <div class="text-caption text-grey-darken-1">
+                        <v-icon icon="mdi-calendar" size="x-small" class="mr-1"></v-icon>
+                        Criado em: {{ formatarData(orcamento.created_at) }}
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Dados do Cliente</h3>
-                            <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Nome</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ orcamento.cliente.nome }}</dd>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Email</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ orcamento.cliente.email || '-' }}</dd>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Telefone</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ orcamento.cliente.telefone || '-' }}</dd>
-                                </div>
-                            </dl>
-                        </div>
-
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Detalhes do Evento</h3>
-                            <dl class="grid grid-cols-1 gap-x-4 gap-y-4">
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Data do Evento</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ formatarData(orcamento.data_evento) }}</dd>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Local</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ orcamento.local_evento || 'Não informado' }}</dd>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <dt class="text-sm font-medium text-gray-500">Validade da Proposta</dt>
-                                    <dd class="mt-1 text-sm text-red-600">{{ formatarData(orcamento.data_expiracao) }}</dd>
-                                </div>
-                            </dl>
-                        </div>
+                <div class="text-md-right mt-4 mt-md-0">
+                    <div class="text-caption text-grey-darken-1 font-weight-bold text-uppercase">Valor Total</div>
+                    <div class="text-h4 font-weight-bold text-grey-darken-3">
+                        {{ formatarMoeda(orcamento.valor_total) }}
                     </div>
-
-                    <div class="px-6 md:px-8 pb-8">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Itens do Orçamento</h3>
-                        <div class="border rounded-lg overflow-hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qtd</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Preço Unit.</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                                </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="item in orcamento.itens" :key="item.id">
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ item.nome }}</div>
-                                        <div class="text-sm text-gray-500">{{ item.descricao }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center text-sm text-gray-500">
-                                        {{ item.quantidade }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right text-sm text-gray-500">
-                                        {{ formatarMoeda(item.preco_unitario) }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right text-sm font-medium text-gray-900">
-                                        {{ formatarMoeda(item.subtotal) }}
-                                    </td>
-                                </tr>
-                                </tbody>
-                                <tfoot class="bg-gray-50">
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">Total Geral</td>
-                                    <td class="px-6 py-4 text-right text-sm font-bold text-gray-900">{{ formatarMoeda(orcamento.valor_total) }}</td>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="px-6 md:px-8 pb-8" v-if="orcamento.observacoes">
-                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Observações Internas</h3>
-                        <div class="bg-yellow-50 border border-yellow-100 rounded p-4 text-sm text-gray-700 whitespace-pre-wrap">
-                            {{ orcamento.observacoes }}
-                        </div>
-                    </div>
-
                 </div>
             </div>
-        </div>
+
+            <v-card-text class="pa-6">
+                <v-row>
+                    <v-col cols="12" md="6">
+                        <div class="mb-4 pb-2 border-b">
+                            <h3 class="text-h6 font-weight-medium text-grey-darken-3">Dados do Cliente</h3>
+                        </div>
+
+                        <v-list density="compact" class="pa-0">
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Nome</template>
+                                <template v-slot:title>
+                                    <span class="text-body-1 font-weight-medium text-grey-darken-3">{{ orcamento.cliente.nome }}</span>
+                                </template>
+                            </v-list-item>
+
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Email</template>
+                                <template v-slot:title>
+                                    <span class="text-body-2">{{ orcamento.cliente.email || '-' }}</span>
+                                </template>
+                            </v-list-item>
+
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Telefone</template>
+                                <template v-slot:title>
+                                    <span class="text-body-2">{{ orcamento.cliente.telefone || '-' }}</span>
+                                </template>
+                            </v-list-item>
+                        </v-list>
+                    </v-col>
+
+                    <v-col cols="12" md="6">
+                        <div class="mb-4 pb-2 border-b">
+                            <h3 class="text-h6 font-weight-medium text-grey-darken-3">Detalhes do Evento</h3>
+                        </div>
+
+                        <v-list density="compact" class="pa-0">
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Data do Evento</template>
+                                <template v-slot:title>
+                                    <span class="text-body-1 font-weight-medium text-grey-darken-3">
+                                        {{ formatarData(orcamento.data_evento) }}
+                                    </span>
+                                </template>
+                            </v-list-item>
+
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Local</template>
+                                <template v-slot:title>
+                                    <span class="text-body-2">{{ orcamento.local_evento || 'Não informado' }}</span>
+                                </template>
+                            </v-list-item>
+
+                            <v-list-item class="px-0">
+                                <template v-slot:subtitle>Validade da Proposta</template>
+                                <template v-slot:title>
+                                    <span class="text-body-2 text-red-darken-1 font-weight-bold">
+                                        {{ formatarData(orcamento.data_expiracao) }}
+                                    </span>
+                                </template>
+                            </v-list-item>
+                        </v-list>
+                    </v-col>
+                </v-row>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <div class="pa-6">
+                <h3 class="text-h6 font-weight-medium text-grey-darken-3 mb-4">Itens do Orçamento</h3>
+
+                <v-card variant="outlined" class="overflow-hidden">
+                    <v-table>
+                        <thead class="bg-grey-lighten-4">
+                        <tr>
+                            <th class="text-left font-weight-bold text-uppercase text-caption text-grey-darken-1">Descrição</th>
+                            <th class="text-center font-weight-bold text-uppercase text-caption text-grey-darken-1">Qtd</th>
+                            <th class="text-right font-weight-bold text-uppercase text-caption text-grey-darken-1">Preço Unit.</th>
+                            <th class="text-right font-weight-bold text-uppercase text-caption text-grey-darken-1">Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="item in orcamento.itens" :key="item.id">
+                            <td class="py-3">
+                                <div class="font-weight-medium text-body-2">{{ item.nome }}</div>
+                                <div class="text-caption text-grey">{{ item.descricao }}</div>
+                            </td>
+                            <td class="text-center text-body-2 text-grey-darken-1">{{ item.quantidade }}</td>
+                            <td class="text-right text-body-2 text-grey-darken-1">{{ formatarMoeda(item.preco_unitario) }}</td>
+                            <td class="text-right font-weight-bold text-body-2">{{ formatarMoeda(item.subtotal) }}</td>
+                        </tr>
+                        </tbody>
+                        <tfoot class="bg-grey-lighten-5">
+                        <tr>
+                            <td colspan="3" class="text-right font-weight-bold text-body-1">Total Geral</td>
+                            <td class="text-right font-weight-bold text-h6 text-grey-darken-3">{{ formatarMoeda(orcamento.valor_total) }}</td>
+                        </tr>
+                        </tfoot>
+                    </v-table>
+                </v-card>
+            </div>
+
+            <div v-if="orcamento.observacoes" class="pa-6 pt-0">
+                <div class="text-caption font-weight-bold text-grey-darken-1 text-uppercase mb-2">Observações Internas</div>
+                <v-sheet
+                    color="amber-lighten-5"
+                    class="pa-4 text-body-2 text-grey-darken-3 border rounded border-amber-lighten-4"
+                    style="white-space: pre-wrap;"
+                >
+                    {{ orcamento.observacoes }}
+                </v-sheet>
+            </div>
+
+        </v-card>
     </AppLayout>
 </template>
+
+<style scoped>
+.gap-2 { gap: 8px; }
+/* Borda manual para o sheet de observações parecer um alert customizado */
+.border-amber-lighten-4 {
+    border-color: #FFECB3 !important;
+}
+</style>

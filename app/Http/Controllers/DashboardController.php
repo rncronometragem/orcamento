@@ -50,6 +50,13 @@ class DashboardController extends Controller
                 ];
             });
 
+        $orcamentosAprovados = Orcamento::select(['data_evento'])->where('status', 'like', 'aprovado')->get();
+
+        $orcamentosPendentes = Orcamento::select(['data_evento'])->where('status', 'like', 'pendente')->get();
+
+        $clientes = Cliente::select('id', 'nome')->orderBy('nome')->get();
+        $produtos = Produto::select('id', 'nome', 'valor')->orderBy('nome')->get();
+
         return Inertia::render('Dashboard', [
             'kpis' => [
                 'clientes' => $totalClientes,
@@ -60,7 +67,11 @@ class DashboardController extends Controller
                 'labels' => $vendasSemestrais->pluck('mes'),
                 'dados' => $vendasSemestrais->pluck('total'),
             ],
-            'recentes' => $ultimosOrcamentos
+            'recentes' => $ultimosOrcamentos,
+            'clientes' => $clientes,
+            'produtos' => $produtos,
+            'orcamentosAprovados' => $orcamentosAprovados,
+            'orcamentosPendentes' => $orcamentosPendentes,
         ]);
     }
 }

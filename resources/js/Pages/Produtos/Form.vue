@@ -11,8 +11,7 @@ const titulo = computed(() => isEditing.value ? 'Editar Produto' : 'Novo Produto
 const form = useForm({
     _method: isEditing.value ? 'put' : 'post',
     nome: props.produto?.nome || '',
-    valor: props.produto?.valor || '', // Agora mapeia para 'valor'
-    // usuario_log não precisa estar aqui, o backend preenche sozinho
+    valor: props.produto?.valor || '',
 });
 
 const submit = () => {
@@ -28,36 +27,64 @@ const submit = () => {
     <AppLayout>
         <template #header>{{ titulo }}</template>
 
-        <div class="max-w-3xl mx-auto py-6">
-            <div class="bg-white p-8 rounded-lg shadow">
+        <div class="pa-6">
+            <v-card class="mx-auto" max-width="800" elevation="2" rounded="lg">
 
-                <form @submit.prevent="submit">
+                <v-form @submit.prevent="submit">
+                    <v-card-text class="pa-6">
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-bold mb-2">Nome do Produto</label>
-                        <input v-model="form.nome" type="text" class="w-full border rounded p-2" placeholder="Ex: Câmera de Segurança HD" maxlength="200" required>
-                        <div v-if="form.errors.nome" class="text-red-500 text-sm mt-1">{{ form.errors.nome }}</div>
-                    </div>
+                        <div class="mb-4">
+                            <v-text-field
+                                v-model="form.nome"
+                                label="Nome do Produto"
+                                placeholder="Ex: Câmera de Segurança HD"
+                                variant="outlined"
+                                density="comfortable"
+                                counter="200"
+                                :error-messages="form.errors.nome"
+                            ></v-text-field>
+                        </div>
 
-                    <div class="mb-6">
-                        <label class="block text-gray-700 font-bold mb-2">Valor Unitário (R$)</label>
-                        <input v-model="form.valor" type="number" step="0.01" class="w-full border rounded p-2" placeholder="0.00">
-                        <div v-if="form.errors.valor" class="text-red-500 text-sm mt-1">{{ form.errors.valor }}</div>
-                        <p class="text-xs text-gray-400 mt-1">Deixe em branco se não tiver valor definido.</p>
-                    </div>
+                        <div class="mb-2">
+                            <v-text-field
+                                v-model="form.valor"
+                                label="Valor Unitário"
+                                placeholder="0.00"
+                                type="number"
+                                step="0.01"
+                                prefix="R$"
+                                variant="outlined"
+                                density="comfortable"
+                                :error-messages="form.errors.valor"
+                                hint="Deixe em branco se não tiver valor definido."
+                                persistent-hint
+                            ></v-text-field>
+                        </div>
 
-                    <div class="flex items-center justify-end gap-3">
-                        <Link href="/produtos" class="text-gray-600 hover:underline">Cancelar</Link>
+                    </v-card-text>
 
-                        <button type="submit" :disabled="form.processing"
-                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition">
+                    <v-divider></v-divider>
+
+                    <v-card-actions class="pa-4 justify-end">
+                        <Link href="/produtos" class="text-decoration-none mr-2">
+                            <v-btn variant="text" color="grey-darken-1">
+                                Cancelar
+                            </v-btn>
+                        </Link>
+
+                        <v-btn
+                            type="submit"
+                            color="blue-darken-1"
+                            variant="elevated"
+                            :loading="form.processing"
+                            class="font-weight-bold"
+                        >
                             {{ form.processing ? 'Salvando...' : 'Salvar Produto' }}
-                        </button>
-                    </div>
+                        </v-btn>
+                    </v-card-actions>
+                </v-form>
 
-                </form>
-
-            </div>
+            </v-card>
         </div>
     </AppLayout>
 </template>
